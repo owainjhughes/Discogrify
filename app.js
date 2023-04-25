@@ -56,7 +56,6 @@ app.get('/login', function(req, res)
 
 app.get('/callback', function(req, res) 
 {
-    let start = Date.now();
     var code = req.query.code || null;
     var state = req.query.state || null;
     var stored_state = req.cookies ? req.cookies[stateKey] : null;
@@ -99,8 +98,6 @@ app.get('/callback', function(req, res)
                 get_all_followed(access_token)
                 .then(artist_info => 
                     {
-                        let time_taken = Date.now() - start;
-                        console.log(time_taken)
                         res.render((__dirname + '/templates/artists.html'), {artist_info: artist_info});
                     })
                 .catch(error => 
