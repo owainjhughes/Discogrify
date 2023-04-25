@@ -1,0 +1,30 @@
+{
+  "name": "spotify-popularity-tracker",
+  "version": "1.0.0",
+  "description": "A tool which allows a user to browser analytics about their listening habits",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/owainjhughes/spotify-popularity-tracker.git"
+  },
+  "author": "Owain Hughes",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/owainjhughes/spotify-popularity-tracker/issues"
+  },
+  "homepage": "https://github.com/owainjhughes/spotify-popularity-tracker#readme",
+  "dependencies": {
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "ejs": "^3.1.9",
+    "express": "^4.18.2",
+    "html": "^1.0.0",
+    "json2csv": "^6.0.0-alpha.2",
+    "node-fetch": "^2.6.1",
+    "querystring": "^0.2.1",
+    "request": "^2.88.2"
+  }
+}
