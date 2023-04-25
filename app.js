@@ -6,6 +6,7 @@ var querystring = require('querystring');
 var cookieParser = require('cookie-parser');
 var fetch = require('node-fetch');
 var html = require('html');
+const { start } = require('repl');
 
 //Building the app
 var app = express();
@@ -23,6 +24,7 @@ var client_secret = 'a79e70246b7e43f0bc9d9629c5b559ac';
 var stateKey = 'spotify_auth_state';
 var scope = 'user-follow-read';
 
+// Function that generates a random string to use as the app's state as a security measure
 var generate_random_string = function() 
 {
     var string = '';
@@ -37,7 +39,7 @@ var generate_random_string = function()
 
 app.get('/login', function(req, res) 
 {
-
+    // Authorizes user with Spotify, sends client information in URL
     var state = generate_random_string();
     res.cookie(stateKey, state);
 
@@ -54,11 +56,12 @@ app.get('/login', function(req, res)
 
 app.get('/callback', function(req, res) 
 {
+    let start = Date.now();
     var code = req.query.code || null;
     var state = req.query.state || null;
-    var storedState = req.cookies ? req.cookies[stateKey] : null;
+    var stored_state = req.cookies ? req.cookies[stateKey] : null;
 
-    if (state === null || state !== storedState) 
+    if (state === null || state !== stored_state) 
     {
     res.redirect('/#' +
         querystring.stringify(
@@ -69,7 +72,8 @@ app.get('/callback', function(req, res)
     else 
     {
         res.clearCookie(stateKey);
-        var authOptions = 
+        // Information needed to gain access token
+        var auth_options = 
         {
             url: 'https://accounts.spotify.com/api/token',
             form: 
@@ -80,31 +84,23 @@ app.get('/callback', function(req, res)
             },
             headers: 
             {
-                'Authorization': 'Basic ' + (new Buffer(client_id + ':' + client_secret).toString('base64'))
+                'Authorization': 'Basic ' + (new Buffer.from(client_id + ':' + client_secret).toString('base64'))
             },
             json: true
         };
 
-        request.post(authOptions, function(error, response, body) 
+        // Request made to Spotify API to receive an access token, followed by calling the function to get a user's followed artist
+        request.post(auth_options, function(error, response, body) 
         {
             if (!error && response.statusCode === 200) 
             {
                 var access_token = body.access_token;
 
-                var options = 
-                {
-                    url: 'https://api.spotify.com/v1/me',
-                    headers: 
-                    { 
-                        'Authorization': 'Bearer ' + access_token 
-                    },
-                    json: true
-                };
-
                 get_all_followed(access_token)
                 .then(artist_info => 
                     {
-                        //console.log(artist_info);
+                        let time_taken = Date.now() - start;
+                        console.log(time_taken)
                         res.render((__dirname + '/templates/artists.html'), {artist_info: artist_info});
                     })
                 .catch(error => 
@@ -116,13 +112,15 @@ app.get('/callback', function(req, res)
     }
 });
 
+
+// Function to get all the artist a user follows on Spotify. limit and offset needed to gain artists above an index of 50, since the
+// Spotify API only sends 50 objects per API call
 async function get_all_followed(access_token) 
 {
     const limit = 50;
     let offset = 0;
     let total = 1;
     let artists = [];
-    const accessToken = access_token;
 
     const get_artists = async () => 
     {
