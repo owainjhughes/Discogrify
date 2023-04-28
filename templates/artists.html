@@ -1,30 +1,21 @@
 <!DOCTYPE html>
 <html>
     <head>
-    <meta charset="UTF-8">
-    <title>Followed Artists</title>
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
-    <style type="text/css">
-        @media screen and (min-width: 600px) {
-            div.artist_table {
-            font-size: 20px;
-            }
-        }
-        @media screen and (max-width: 600px) {
-            div.artist_table {
-            font-size: 10px;
-            }
-        }
-        footer{
-            position: fixed;
-            bottom: 0;
-            left: 42%;
-        }
-    </style>  
+        <meta charset="UTF-8">
+        <title>Followed Artists</title>
+        <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
+        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="static/style.css">
     </head>
 
     <body>
+
+        <h1>
+            <span id="most-popular">Most Popular: <%= scores[0] %></span>     
+            <span id="least-popular">Least Popular: <%= scores[1] %></span>       
+            <span id="average-popular">Average Popularity: <%= scores[2] %></span>
+        </h1>
+
         <div class="artist_table">
         <table class="table table-inverse" id="artist_info">
             <thead>

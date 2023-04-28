@@ -6,7 +6,6 @@ NodeJS environment must be installed, link can be found [here](https://nodejs.or
 
 Application was developed on NodeJS build **16.17.1**, if there are errors regarding modules try using this build.
 
-
 Once installed, clone this repositiry and run the command: <code>npm install</code> to install dependencies
 
 This should download all the necessary dependancies as found in package.json. Otherwise install the dependencies manually from the list on package.json

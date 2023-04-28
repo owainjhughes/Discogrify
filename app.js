@@ -98,7 +98,9 @@ app.get('/callback', function(req, res)
                 get_all_followed(access_token)
                 .then(artist_info => 
                     {
-                        res.render((__dirname + '/templates/artists.html'), {artist_info: artist_info});
+                        const data = Object.values(artist_info).map((item) => item.popularity)
+                        scores = get_score_stats(data)
+                        res.render((__dirname + '/templates/artists.html'), {artist_info: artist_info, scores: scores});
                     })
                 .catch(error => 
                     {
@@ -139,9 +141,30 @@ async function get_all_followed(access_token)
         return artists;
     };
 
-    const artistData = await get_artists();
-    const artistInfo = artistData.map(artist => ({ name: artist.name, popularity: artist.popularity }));
-    return artistInfo;
+    const artist_data = await get_artists();
+    const artist_info = artist_data.map(artist => ({ name: artist.name, popularity: artist.popularity }));
+    return artist_info;
+}
+
+// Find the lowest, highest and average score, used for statistics on a users library
+function get_score_stats(data) 
+{
+    var sum = data[0];
+    var highest = data[0];
+    var lowest = data[0];
+    for (var i = 1; i < data.length; i++) 
+    {
+        if (data[i] > highest) 
+        {
+            highest = data[i];
+        }
+        if (data[i] < lowest) 
+        {
+            lowest = data[i];
+        }
+        sum = sum + data[i];
+    }
+    return [highest, lowest, Math.round(sum/data.length)];
 }
 
 
