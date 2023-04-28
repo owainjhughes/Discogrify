@@ -21,7 +21,7 @@ app.use(express.static(__dirname + '/templates'))
 var redirect_uri = 'http://localhost:8888/callback'; 
 var client_id = 'dc81a408e2804f998ad6d882a56360d9'; 
 var client_secret = 'a79e70246b7e43f0bc9d9629c5b559ac'; 
-var stateKey = 'spotify_auth_state';
+var state_key = 'spotify_auth_state';
 var scope = 'user-follow-read';
 
 // Function that generates a random string to use as the app's state as a security measure
@@ -41,7 +41,7 @@ app.get('/login', function(req, res)
 {
     // Authorizes user with Spotify, sends client information in URL
     var state = generate_random_string();
-    res.cookie(stateKey, state);
+    res.cookie(state_key, state);
 
     res.redirect('https://accounts.spotify.com/authorize?' +
         querystring.stringify({
@@ -58,7 +58,7 @@ app.get('/callback', function(req, res)
 {
     var code = req.query.code || null;
     var state = req.query.state || null;
-    var stored_state = req.cookies ? req.cookies[stateKey] : null;
+    var stored_state = req.cookies ? req.cookies[state_key] : null;
 
     if (state === null || state !== stored_state) 
     {
@@ -70,7 +70,7 @@ app.get('/callback', function(req, res)
     } 
     else 
     {
-        res.clearCookie(stateKey);
+        res.clearCookie(state_key);
         // Information needed to gain access token
         var auth_options = 
         {
