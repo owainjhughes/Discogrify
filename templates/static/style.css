@@ -22,3 +22,47 @@ footer{
 #average-popular{
     color: blue;
 }
+.float-container {
+    width: 450px;
+    height: 350px;
+    background-color: #0a0a0a96;
+    border-radius: 10px;
+    text-align: center;
+    line-height: 100px; /* Center the text vertically */
+    border: 3px solid #1ed760;
+    padding: 50px;
+    display: flex;
+    justify-content: center;
+}
+
+.float-child {
+    float: left;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+}  
+.login-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: 50px;
+}
+.spotify-logo {
+    display: flex;
+    justify-content: center;
+    margin: 20px;
+}
+
+footer{
+    position: fixed;
+    bottom: 0;
+    left: 37%;
+}
+body {
+    margin: 0;
+    padding: 0;
+    height: 100vh; /* Make the body take up the full height of the viewport */
+    background-color: #121212;
+    font-family: sans-serif;
+}
+
