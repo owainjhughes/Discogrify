@@ -1,0 +1,14 @@
+{
+    "version": 2,
+    "builds": [
+    { "src": "app.js", "use": "@vercel/node" },
+    { "src": "*.html", "use": "@vercel/static" },
+    { "src": "static/**", "use": "@vercel/static" }
+    ],
+    "routes": [
+    { "src": "/", "dest": "/index.html" },
+    { "src": "/artists", "dest": "/artists.html" },
+    { "src": "/static/(.*)", "dest": "/static/$1" },
+    { "src": "/(.*)", "dest": "/app.js" }
+    ]
+}
