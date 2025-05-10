@@ -9,7 +9,7 @@ var html = require('html');
 const { start } = require('repl');
 const path = require('path');
 
-//Building the app
+// Building the app
 var app = express();
 app.use(express.static(__dirname + '/templates'))
     .use(cors())
@@ -19,12 +19,11 @@ app.use(express.static(__dirname + '/templates'))
 
 
 // Spotify App credentials
-// Update redirect URI based on environment
 var redirect_uri = process.env.NODE_ENV === 'production' 
     ? process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}/callback` : 'https://spotify-popularity-tracker.app/callback'
     : 'http://localhost:8888/callback'; 
-var client_id = 'dc81a408e2804f998ad6d882a56360d9'; 
-var client_secret = 'a79e70246b7e43f0bc9d9629c5b559ac'; 
+var client_id = process.env.CLIENT_ID
+var client_secret = process.env.CLIENT_SECRET; 
 var state_key = 'spotify_auth_state';
 var scope = 'user-follow-read';
 
@@ -171,11 +170,10 @@ function get_score_stats(data)
     return [highest, lowest, Math.round(sum/data.length)];
 }
 
-// For local development
+// Local deploy
 if (process.env.NODE_ENV !== 'production') {
     console.log('Listening on 8888');
     app.listen(8888);
 }
 
-// This is required for Vercel - export the Express app
 module.exports = app;
