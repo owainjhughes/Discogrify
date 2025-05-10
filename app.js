@@ -35,8 +35,8 @@ function getCallbackUrl(req) {
 }
 
 // This will be set during the request
-var client_id = process.env.client_id;
-var client_secret = process.env.client_secret; 
+var client_id = 'dc81a408e2804f998ad6d882a56360d9';
+var client_secret = 'a79e70246b7e43f0bc9d9629c5b559ac'; 
 var state_key = 'spotify_auth_state';
 var scope = 'user-follow-read';
 
