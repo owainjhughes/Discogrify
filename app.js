@@ -22,7 +22,7 @@ app.use(express.static(__dirname + '/templates'))
 var redirect_uri = process.env.NODE_ENV === 'production' 
     ? process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}/callback` : 'https://spotify-popularity-tracker.app/callback'
     : 'http://localhost:8888/callback'; 
-var client_id = process.env.CLIENT_ID
+var client_id = process.env.CLIENT_ID;
 var client_secret = process.env.CLIENT_SECRET; 
 var state_key = 'spotify_auth_state';
 var scope = 'user-follow-read';
