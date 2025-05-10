@@ -17,6 +17,8 @@ app.use(express.static(__dirname + '/templates'))
     .engine('html', require('ejs').renderFile)
     .set('view engine', 'html');
 
+
+// Spotify App credentials
 // Get the request origin dynamically
 function getCallbackUrl(req) {
     if (process.env.NODE_ENV !== 'production') {
@@ -25,7 +27,7 @@ function getCallbackUrl(req) {
     
     // Use SPOTIFY_CALLBACK_URL if explicitly set in environment variables
     if (process.env.SPOTIFY_CALLBACK_URL) {
-        return process.env.SPOTIFY_CALLBACK_URL;
+        return process.env.SPOTIFY_CALLBACK_URL.trim();
     }
     
     // Default to the production URL
@@ -59,9 +61,21 @@ app.get('/login', function(req, res)
     
     // Get the appropriate redirect URI for this request
     var redirect_uri = getCallbackUrl(req);
+    console.log('Using redirect URI:', redirect_uri);
     
     // Store the redirect URI in a cookie so we can use the same one in the callback
     res.cookie('spotify_redirect_uri', redirect_uri);
+
+    // For debugging - let's also add a debug endpoint
+    console.log('Authorization URL:', 'https://accounts.spotify.com/authorize?' +
+        querystring.stringify({
+        response_type: 'code',
+        client_id: client_id,
+        scope: scope,
+        redirect_uri: redirect_uri,
+        state: state,
+        show_dialog: true
+    }));
 
     res.redirect('https://accounts.spotify.com/authorize?' +
         querystring.stringify({
@@ -190,6 +204,41 @@ function get_score_stats(data)
     }
     return [highest, lowest, Math.round(sum/data.length)];
 }
+
+// Add a direct login path with hardcoded values 
+app.get('/direct-login', function(req, res) {
+    var state = generate_random_string();
+    res.cookie(state_key, state);
+    
+    const hardcoded_url = 'https://spotify-popularity-tracker.app/callback';
+    console.log('Using hardcoded redirect URI:', hardcoded_url);
+    
+    res.cookie('spotify_redirect_uri', hardcoded_url);
+
+    res.redirect('https://accounts.spotify.com/authorize?' +
+        querystring.stringify({
+        response_type: 'code',
+        client_id: client_id,
+        scope: scope,
+        redirect_uri: hardcoded_url,
+        state: state,
+        show_dialog: true
+    }));
+});
+
+// Add a debug endpoint to check redirect URI configuration
+app.get('/debug-spotify-config', function(req, res) {
+    const debugInfo = {
+        environment: process.env.NODE_ENV || 'not set',
+        vercelUrl: process.env.VERCEL_URL || 'not set',
+        redirectUri: getCallbackUrl(req),
+        registeredRedirectUri: 'https://spotify-popularity-tracker.app/callback',
+        spotifyClientId: client_id ? 'configured' : 'missing',
+        spotifyClientSecret: client_secret ? 'configured' : 'missing'
+    };
+    
+    res.json(debugInfo);
+});
 
 // Local deploy
 if (process.env.NODE_ENV !== 'production') {
