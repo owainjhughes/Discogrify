@@ -17,11 +17,22 @@ app.use(express.static(__dirname + '/templates'))
     .engine('html', require('ejs').renderFile)
     .set('view engine', 'html');
 
+// Get the request origin dynamically
+function getCallbackUrl(req) {
+    if (process.env.NODE_ENV !== 'production') {
+        return 'http://localhost:8888/callback';
+    }
+    
+    // Use SPOTIFY_CALLBACK_URL if explicitly set in environment variables
+    if (process.env.SPOTIFY_CALLBACK_URL) {
+        return process.env.SPOTIFY_CALLBACK_URL;
+    }
+    
+    // Default to the production URL
+    return 'https://spotify-popularity-tracker.app/callback';
+}
 
-// Spotify App credentials
-var redirect_uri = process.env.NODE_ENV === 'production' 
-    ? 'https://spotify-popularity-tracker.app/callback'
-    : 'http://localhost:8888/callback';
+// This will be set during the request
 var client_id = process.env.client_id;
 var client_secret = process.env.client_secret; 
 var state_key = 'spotify_auth_state';
@@ -45,6 +56,12 @@ app.get('/login', function(req, res)
     // Authorizes user with Spotify, sends client information in URL
     var state = generate_random_string();
     res.cookie(state_key, state);
+    
+    // Get the appropriate redirect URI for this request
+    var redirect_uri = getCallbackUrl(req);
+    
+    // Store the redirect URI in a cookie so we can use the same one in the callback
+    res.cookie('spotify_redirect_uri', redirect_uri);
 
     res.redirect('https://accounts.spotify.com/authorize?' +
         querystring.stringify({
@@ -62,6 +79,9 @@ app.get('/callback', function(req, res)
     var code = req.query.code || null;
     var state = req.query.state || null;
     var stored_state = req.cookies ? req.cookies[state_key] : null;
+    
+    // Retrieve the same redirect URI we used in the login request
+    var redirect_uri = req.cookies ? req.cookies['spotify_redirect_uri'] : getCallbackUrl(req);
 
     if (state === null || state !== stored_state) 
     {
@@ -74,6 +94,7 @@ app.get('/callback', function(req, res)
     else 
     {
         res.clearCookie(state_key);
+        res.clearCookie('spotify_redirect_uri');
         // Information needed to gain access token
         var auth_options = 
         {
