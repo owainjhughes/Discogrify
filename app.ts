@@ -11,7 +11,8 @@ app.use(express.static(__dirname + '/templates'))
     .use(cors())
     .use(cookieParser())
     .engine('html', require('ejs').renderFile)
-    .set('view engine', 'html');
+    .set('view engine', 'html')
+    .set('views', path.join(__dirname, 'templates'));
 
 // Spotify App credentials
 const redirect_uri = process.env.NODE_ENV === 'production'
