@@ -17,13 +17,15 @@ const request_1 = __importDefault(require("request"));
 const cors_1 = __importDefault(require("cors"));
 const querystring_1 = __importDefault(require("querystring"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
+const path_1 = __importDefault(require("path"));
 // Building the app
 const app = (0, express_1.default)();
-app.use(express_1.default.static(__dirname + '/templates'))
+app.use(express_1.default.static(path_1.default.join(__dirname, '..', 'templates')))
     .use((0, cors_1.default)())
     .use((0, cookie_parser_1.default)())
     .engine('html', require('ejs').renderFile)
-    .set('view engine', 'html');
+    .set('view engine', 'html')
+    .set('views', path_1.default.join(__dirname, '..', 'templates'));
 // Spotify App credentials
 const redirect_uri = process.env.NODE_ENV === 'production'
     ? 'https://spotify-popularity-tracker.vercel.app/callback'
@@ -88,7 +90,7 @@ app.get('/callback', (req, res) => {
                     const artist_info = yield get_all_followed(access_token);
                     const data = Object.values(artist_info).map((item) => item.popularity);
                     const scores = get_score_stats(data);
-                    res.render((__dirname + '/templates/artists.html'), { artist_info: artist_info, scores: scores });
+                    res.render('artists.html', { artist_info: artist_info, scores: scores });
                 }
                 catch (err) {
                     console.error(err);
