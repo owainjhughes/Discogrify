@@ -7,12 +7,12 @@ import path from 'path';
 
 // Building the app
 const app = express();
-app.use(express.static(__dirname + '/templates'))
+app.use(express.static(path.join(__dirname, '..', 'templates')))
     .use(cors())
     .use(cookieParser())
     .engine('html', require('ejs').renderFile)
     .set('view engine', 'html')
-    .set('views', path.join(__dirname, 'templates'));
+    .set('views', path.join(__dirname, '..', 'templates'));
 
 // Spotify App credentials
 const redirect_uri = process.env.NODE_ENV === 'production'
