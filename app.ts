@@ -84,7 +84,7 @@ app.get('/callback', (req: Request, res: Response) => {
                     const artist_info = await get_all_followed(access_token);
                     const data = Object.values(artist_info).map((item: any) => item.popularity);
                     const scores = get_score_stats(data);
-                    res.render((__dirname + '/templates/artists.html'), { artist_info: artist_info, scores: scores });
+                    res.render('artists.html', { artist_info: artist_info, scores: scores });
                 } catch (err) {
                     console.error(err);
                 }
