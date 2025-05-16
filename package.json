@@ -5,9 +5,9 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node app.js",
+    "start": "ts-node app.ts",
     "build": "npm install",
-    "dev": "node app.js"
+    "dev": "ts-node app.ts"
   },
   "repository": {
     "type": "git",
@@ -31,5 +31,13 @@
     "node-fetch": "^2.6.1",
     "querystring": "^0.2.1",
     "request": "^2.88.2"
+  },
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.8",
+    "@types/cors": "^2.8.18",
+    "@types/express": "^5.0.1",
+    "@types/request": "^2.48.12",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
   }
 }
