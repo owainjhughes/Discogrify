@@ -4,10 +4,13 @@ import cors from 'cors';
 import querystring from 'querystring';
 import cookieParser from 'cookie-parser';
 import path from 'path';
+import dotenv from 'dotenv';
+dotenv.config();
 
 // Building the app
 const app = express();
 app.use(express.static(path.join(__dirname, '..', 'templates')))
+    .use('/static', express.static(path.join(__dirname, 'templates', 'static')))
     .use(cors())
     .use(cookieParser())
     .engine('html', require('ejs').renderFile)
@@ -18,7 +21,7 @@ app.use(express.static(path.join(__dirname, '..', 'templates')))
 const redirect_uri = process.env.NODE_ENV === 'production'
     ? 'https://spotify-popularity-tracker.vercel.app/callback'
     : 'http://localhost:8888/callback';
-const client_id = process.env.client_id as string;
+const client_id = process.env.client_id as string
 const client_secret = process.env.client_secret as string;
 const state_key = 'spotify_auth_state';
 const scope = 'user-follow-read';
@@ -93,7 +96,10 @@ app.get('/callback', (req: Request, res: Response) => {
     }
 });
 
-// Function to get all the artist a user follows on Spotify.
+app.get('/', (req: Request, res: Response) => {
+    res.sendFile(path.join(__dirname, 'templates', 'index.html'));
+});
+
 interface Artist {
     name: string;
     popularity: number;
