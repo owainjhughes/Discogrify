@@ -7,6 +7,11 @@ import path from 'path';
 import dotenv from 'dotenv';
 dotenv.config();
 
+// Different paths for loca/prod since vercel needs dist/app.js
+const views_path = process.env.NODE_ENV === 'production'
+    ? path.join(__dirname, '..', 'templates')
+    : path.join(__dirname, 'templates');
+
 // Building the app
 const app = express();
 app.use(express.static(path.join(__dirname, '..', 'templates')))
@@ -15,7 +20,7 @@ app.use(express.static(path.join(__dirname, '..', 'templates')))
     .use(cookieParser())
     .engine('html', require('ejs').renderFile)
     .set('view engine', 'html')
-    .set('views', path.join(__dirname, '..', 'templates'));
+    .set('views', views_path);
 
 // Spotify App credentials
 const redirect_uri = process.env.NODE_ENV === 'production'
