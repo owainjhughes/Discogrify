@@ -7,9 +7,10 @@
     "clean": "rm -rf dist",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node dist/app.js",
-    "build": "npm run clean && tsc && mkdir -p dist/templates && cp -r templates/* dist/templates/",
+    "prebuild": "mkdir -p dist",
+    "build": "tsc && cp -r templates dist/",
     "dev": "npx ts-node app.ts",
-    "vercel-build": "npm run build"
+    "vercel-build": "npm run prebuild && npm run build"
   },
   "repository": {
     "type": "git",
