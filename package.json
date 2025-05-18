@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node dist/app.js",
-    "build": "tsc",
+    "build": "mkdir dist 2>nul || true && tsc",
     "dev": "npx ts-node app.ts",
     "vercel-build": "npm run build"
   },
