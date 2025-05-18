@@ -1,6 +1,11 @@
 {
   "version": 2,
   "buildCommand": "npm run build",
+  "functions": {
+    "dist/app.js": {
+      "runtime": "nodejs18.x"
+    }
+  },
   "routes": [
     { "src": "/static/(.*)", "dest": "/templates/static/$1" },
     { "src": "/login", "dest": "/dist/app.js" },
