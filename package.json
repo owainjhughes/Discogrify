@@ -4,11 +4,12 @@
   "description": "A tool which allows a user to browser analytics about their listening habits",
   "main": "dist/app.js",
   "scripts": {
+    "clean": "rm -rf dist",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node dist/app.js",
-    "build": "mkdir -p dist && tsc",
+    "build": "npm run clean && tsc && mkdir -p dist/templates && cp -r templates/* dist/templates/",
     "dev": "npx ts-node app.ts",
-    "vercel-build": "mkdir -p dist && tsc && cp -r templates dist/"
+    "vercel-build": "npm run build"
   },
   "repository": {
     "type": "git",

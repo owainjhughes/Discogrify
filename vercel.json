@@ -2,10 +2,10 @@
   "version": 2,
   "builds": [
     { "src": "dist/app.js", "use": "@vercel/node" },
-    { "src": "templates/**", "use": "@vercel/static" }
+    { "src": "dist/templates/**", "use": "@vercel/static" }
   ],
   "routes": [
-    { "src": "/static/(.*)", "dest": "/templates/static/$1" },
+    { "src": "/static/(.*)", "dest": "/dist/templates/static/$1" },
     { "src": "/login", "dest": "/dist/app.js" },
     { "src": "/callback", "dest": "/dist/app.js" },
     { "src": "/", "dest": "/dist/app.js" },
