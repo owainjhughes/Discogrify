@@ -9,7 +9,8 @@
     { "src": "/login", "dest": "/dist/app.js" },
     { "src": "/callback", "dest": "/dist/app.js" },
     { "src": "/", "dest": "/templates/index.html" },
-    { "src": "/artists", "dest": "/templates/artists.html" },
+    { "src": "/artists", "dest": "/dist/app.js" },
+    { "src": "/logout", "dest": "/dist/app.js" },
     { "src": "/(.*)", "dest": "/dist/app.js" }
   ]
 }
