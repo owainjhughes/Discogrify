@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "npm install && npm run build",
+  "buildCommand": "npm run build",
   "routes": [
     { "src": "/static/(.*)", "dest": "/templates/static/$1" },
     { "src": "/login", "dest": "/dist/app.js" },
