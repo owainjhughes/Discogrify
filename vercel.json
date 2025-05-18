@@ -1,9 +1,11 @@
 {
   "version": 2,
   "buildCommand": "npm run build",
-  "builds": [
-    { "src": "dist/app.js", "use": "@vercel/node" }
-  ],
+  "functions": {
+    "dist/app.js": {
+      "runtime": "@vercel/node"
+    }
+  },
   "routes": [
     { "src": "/static/(.*)", "dest": "/templates/static/$1" },
     { "src": "/login", "dest": "/dist/app.js" },
