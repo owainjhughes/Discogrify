@@ -8,7 +8,7 @@
     "start": "node dist/app.js",
     "build": "mkdir -p dist && tsc",
     "dev": "npx ts-node app.ts",
-    "vercel-build": "mkdir -p dist && tsc"
+    "vercel-build": "mkdir -p dist && tsc && cp -r templates dist/"
   },
   "repository": {
     "type": "git",
