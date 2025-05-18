@@ -4,6 +4,7 @@
     { "src": "dist/app.js", "use": "@vercel/node" },
     { "src": "templates/**", "use": "@vercel/static" }
   ],
+  "buildCommand": "npm install && npm run build",
   "routes": [
     { "src": "/static/(.*)", "dest": "/templates/static/$1" },
     { "src": "/login", "dest": "/dist/app.js" },
