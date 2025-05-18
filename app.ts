@@ -5,6 +5,7 @@ import querystring from 'querystring';
 import cookieParser from 'cookie-parser';
 import path from 'path';
 import dotenv from 'dotenv';
+import session from 'express-session';
 dotenv.config();
 
 // Different paths for loca/prod since vercel needs dist/app.js
@@ -12,12 +13,24 @@ const views_path = process.env.NODE_ENV === 'production'
     ? path.join(__dirname, '..', 'templates')
     : path.join(__dirname, 'templates');
 
+declare module 'express-session' {
+    interface SessionData {
+        access_token?: string;
+    }
+}
+
 // Building the app
 const app = express();
 app.use(express.static(path.join(__dirname, '..', 'templates')))
     .use('/static', express.static(path.join(__dirname, 'templates', 'static')))
     .use(cors())
     .use(cookieParser())
+    .use(session({
+        secret: 'your_secret',
+        resave: false,
+        saveUninitialized: true,
+        cookie: {maxAge: 7 * 24 * 60 * 60 * 1000} 
+    }))
     .engine('html', require('ejs').renderFile)
     .set('view engine', 'html')
     .set('views', views_path);
@@ -92,7 +105,9 @@ app.get('/callback', (req: Request, res: Response) => {
                     const artist_info = await get_all_followed(access_token);
                     const data = Object.values(artist_info).map((item: any) => item.popularity);
                     const scores = get_score_stats(data);
-                    res.render('artists.html', { artist_info: artist_info, scores: scores });
+                    req.session.access_token = access_token;
+                    res.cookie('logged_in', 'true', { maxAge: 7 * 24 * 60 * 60 * 1000, httpOnly: false });
+                    res.redirect('/artists');
                 } catch (err) {
                     console.error(err);
                 }
@@ -101,8 +116,33 @@ app.get('/callback', (req: Request, res: Response) => {
     }
 });
 
+app.get('/artists', async (req: Request, res: Response) => {
+    if (req.cookies.logged_in === 'true' && req.session.access_token) {
+        try {
+            const artist_info = await get_all_followed(req.session.access_token);
+            const data = Object.values(artist_info).map((item: any) => item.popularity);
+            const scores = get_score_stats(data);
+            res.render('artists.html', { artist_info, scores });
+        } catch (err) {
+            console.error(err);
+            res.redirect('/');
+        }
+    } else {
+        res.redirect('/');
+    }
+});
+
 app.get('/', (req: Request, res: Response) => {
-    res.sendFile(path.join(__dirname, 'templates', 'index.html'));
+    if (req.cookies.logged_in === 'true' && req.session.access_token) {
+        res.redirect('/artists');
+    } else {
+        res.sendFile(path.join(__dirname, 'templates', 'index.html'));
+    }
+});
+
+app.get('/logout', (req: Request, res: Response) => {
+    res.clearCookie('logged_in');
+    res.redirect('/');
 });
 
 interface Artist {
