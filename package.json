@@ -6,9 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node dist/app.js",
-    "build": "mkdir dist 2>nul || true && tsc",
+    "build": "mkdir -p dist && tsc",
     "dev": "npx ts-node app.ts",
-    "vercel-build": "npm run build"
+    "vercel-build": "mkdir -p dist && tsc"
   },
   "repository": {
     "type": "git",
