@@ -9,8 +9,8 @@ import session from 'express-session';
 dotenv.config();
 
 // Different paths for loca/prod since vercel needs dist/app.js
-const views_path = process.env.NODE_ENV === 'production'
-    ? path.join(__dirname, '..', 'templates')
+const views_path = process.env.VERCEL 
+    ? path.join('/var/task', 'templates')  // Vercel serverless path
     : path.join(__dirname, 'templates');
 
 declare module 'express-session' {

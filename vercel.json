@@ -1,14 +1,18 @@
 {
   "version": 2,
+  "buildCommand": "npm run vercel-build",
+  "outputDirectory": "dist",
   "builds": [
     { 
       "src": "app.ts",
-      "use": "@vercel/node",
-      "config": { "buildCommand": "npm run build" }
+      "use": "@vercel/node"
     },
     { 
       "src": "templates/**", 
-      "use": "@vercel/static" 
+      "use": "@vercel/static",
+      "config": {
+        "zeroConfig": true
+      }
     }
   ],
   "routes": [
