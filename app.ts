@@ -8,7 +8,7 @@ import dotenv from 'dotenv';
 import session from 'express-session';
 dotenv.config();
 
-// Different paths for loca/prod since vercel needs dist/app.js
+// Different paths for local/prod since vercel needs dist/app.js
 const views_path = process.env.VERCEL 
     ? path.join('/var/task', 'templates')  // Vercel serverless path
     : path.join(__dirname, 'templates');
@@ -26,7 +26,7 @@ app.use(express.static(path.join(__dirname, '..', 'templates')))
     .use(cors())
     .use(cookieParser())
     .use(session({
-        secret: 'your_secret',
+        secret: process.env.cookie_secret as string,
         resave: false,
         saveUninitialized: true,
         cookie: {maxAge: 7 * 24 * 60 * 60 * 1000} 
@@ -107,7 +107,7 @@ app.get('/callback', (req: Request, res: Response) => {
                     const scores = get_score_stats(data);
                     req.session.access_token = access_token;
                     res.cookie('logged_in', 'true', { maxAge: 7 * 24 * 60 * 60 * 1000, httpOnly: false });
-                    res.redirect('/artists');
+                    res.redirect('/');
                 } catch (err) {
                     console.error(err);
                 }
@@ -116,7 +116,23 @@ app.get('/callback', (req: Request, res: Response) => {
     }
 });
 
-app.get('/artists', async (req: Request, res: Response) => {
+//app.get('/artists', async (req: Request, res: Response) => {
+//    if (req.cookies.logged_in === 'true' && req.session.access_token) {
+//        try {
+//            const artist_info = await get_all_followed(req.session.access_token);
+//            const data = Object.values(artist_info).map((item: any) => item.popularity);
+//            const scores = get_score_stats(data);
+//            res.render('artists.html', { artist_info, scores });
+//        } catch (err) {
+//            console.error(err);
+//            res.redirect('/');
+//        }
+//    } else {
+//        res.redirect('/');
+//    }
+//});
+
+app.get('/', async (req: Request, res: Response) => {
     if (req.cookies.logged_in === 'true' && req.session.access_token) {
         try {
             const artist_info = await get_all_followed(req.session.access_token);
@@ -127,14 +143,6 @@ app.get('/artists', async (req: Request, res: Response) => {
             console.error(err);
             res.redirect('/');
         }
-    } else {
-        res.redirect('/');
-    }
-});
-
-app.get('/', (req: Request, res: Response) => {
-    if (req.cookies.logged_in === 'true' && req.session.access_token) {
-        res.redirect('/artists');
     } else {
         res.sendFile(path.join(__dirname, 'templates', 'index.html'));
     }
