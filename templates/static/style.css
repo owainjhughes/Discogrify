@@ -61,9 +61,11 @@ footer{
 body {
     margin: 0;
     padding: 0;
-    height: 100vh; /* Make the body take up the full height of the viewport */
+    height: 100vh;
     background-color: #121212;
     font-family: sans-serif;
+    border-left: 20px solid #121212;
+    border-right: 20px solid #121212;
 }
 .fade-in {
   opacity: 0;
@@ -72,5 +74,20 @@ body {
 
 .fade-in.visible {
   opacity: 1;
+}
+.navbar-default .navbar-brand:hover,
+.navbar-default .navbar-nav > li > a:hover {
+    color: #fff !important;
+    background-color: #282828;
+}
+
+.navbar-default .navbar-nav > .active > a,
+.navbar-default .navbar-nav > .active > a:hover {
+    background-color: #282828;
+    color: #1ed760 !important;
+}
+
+.navbar {
+    margin-bottom: 30px;
 }
 

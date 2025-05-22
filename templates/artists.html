@@ -9,6 +9,21 @@
     </head>
 
     <body>
+            <nav class="navbar navbar-default" style="background-color: #191414; border-bottom: 2px solid #1ed760;">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#" style="color: #1ed760;">Spotify Popularity Tracker</a>
+            </div>
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="/" style="color: #1ed760;">Artists</a></li>
+                <li><a href="#" style="color: #1ed760;">Stats</a></li>
+                <li><a href="/privacy" style="color: #1ed760;">Privacy</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="/logout" style="color: #dc3545;">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
 
         <!-- <h1>
             <span id="most-popular">Most Popular: <%= scores[0] %></span>     
@@ -16,7 +31,6 @@
             <span id="average-popular">Average Popularity: <%= scores[2] %></span>
         </h1> -->
 
-        <a href="/logout" class="btn btn-danger" style="margin: 20px 0;">Log out</a>
         <div class="artist_table">
         <table class="table table-inverse" id="artist_info">
             <thead>

@@ -153,6 +153,10 @@ app.get('/logout', (req: Request, res: Response) => {
     res.redirect('/');
 });
 
+app.get('/privacy', (req: Request, res: Response) => {
+    res.sendFile(path.join(__dirname, 'templates', 'privacy.html'));
+});
+
 interface Artist {
     name: string;
     popularity: number;
@@ -208,5 +212,5 @@ if (process.env.NODE_ENV !== 'production') {
     app.listen(8888);
 }
 
-// This is required for Vercel - export the Express app
+// This is required for Vercel
 module.exports = app;
