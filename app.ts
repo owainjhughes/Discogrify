@@ -1,3 +1,4 @@
+import { APIError, Artist, CacheEntry } from './types/interfaces';
 import express, { Request, Response } from 'express';
 import request from 'request';
 import cors from 'cors';
@@ -14,10 +15,12 @@ const views_path = process.env.VERCEL
     : path.join(__dirname, 'templates');
 
 declare module 'express-session' {
-    interface SessionData {
+    interface Session {
         access_token?: string;
     }
 }
+const artistCache: Map<string, CacheEntry> = new Map();
+const CACHE_DURATION = 1000 * 60 * 15; // 15 minutes
 
 // Building the app
 const app = express();
@@ -33,7 +36,15 @@ app.use(express.static(path.join(__dirname, '..', 'templates')))
     }))
     .engine('html', require('ejs').renderFile)
     .set('view engine', 'html')
-    .set('views', views_path);
+    .set('views', views_path)
+    .use((err: APIError, req: Request, res: Response, _next: any) => {
+    console.error(err.stack);
+    const statusCode = err.statusCode || 500;
+    res.status(statusCode).json({
+        error: err.message || 'Internal Server Error',
+        status: statusCode
+        });
+    });
 
 // Spotify App credentials
 const redirect_uri = process.env.NODE_ENV === 'production'
@@ -157,13 +168,13 @@ app.get('/privacy', (req: Request, res: Response) => {
     res.sendFile(path.join(__dirname, 'templates', 'privacy.html'));
 });
 
-interface Artist {
-    name: string;
-    popularity: number;
-    image: string;
-}
-
 async function get_all_followed(access_token: string): Promise<Artist[]> {
+    const cached = artistCache.get(access_token);
+    const now = Date.now();
+
+    if (cached && (now - cached.timestamp) < CACHE_DURATION) {
+        return cached.data;
+    }
     const limit = 50;
     let offset = 0;
     let total = 1;
@@ -187,6 +198,10 @@ async function get_all_followed(access_token: string): Promise<Artist[]> {
 
     const artist_data = await get_artists();
     const artist_info: Artist[] = artist_data.map((artist: any) => ({ name: artist.name, popularity: artist.popularity, image: artist.images[0]?.url || ''}));
+    artistCache.set(access_token, {
+        data: artist_info,
+        timestamp: now
+    });
     return artist_info;
 }
 
@@ -209,8 +224,17 @@ function get_score_stats(data: number[]): [number, number, number] {
 
 // For local development
 if (process.env.NODE_ENV !== 'production') {
-    console.log('Listening on 8888');
-    app.listen(8888);
+    const server = app.listen(8888, () => {
+        console.log('Listening on 8888');
+    });
+
+    process.on('SIGTERM', () => {
+        console.log('Closing HTTP server');
+        server.close(() => {
+            console.log('HTTP server closed');
+            process.exit(0);
+        });
+    });
 }
 
 // This is required for Vercel
