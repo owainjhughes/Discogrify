@@ -160,6 +160,7 @@ app.get('/privacy', (req: Request, res: Response) => {
 interface Artist {
     name: string;
     popularity: number;
+    image: string;
 }
 
 async function get_all_followed(access_token: string): Promise<Artist[]> {
@@ -185,7 +186,7 @@ async function get_all_followed(access_token: string): Promise<Artist[]> {
     };
 
     const artist_data = await get_artists();
-    const artist_info: Artist[] = artist_data.map((artist: any) => ({ name: artist.name, popularity: artist.popularity }));
+    const artist_info: Artist[] = artist_data.map((artist: any) => ({ name: artist.name, popularity: artist.popularity, image: artist.images[0]?.url || ''}));
     return artist_info;
 }
 

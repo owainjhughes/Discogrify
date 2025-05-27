@@ -90,4 +90,13 @@ body {
 .navbar {
     margin-bottom: 30px;
 }
+.table img {
+    object-fit: cover;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transition: transform 0.2s;
+}
+
+.table img:hover {
+    transform: scale(1.1);
+}
 
