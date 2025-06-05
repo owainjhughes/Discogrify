@@ -3,66 +3,68 @@
     <head>
         <meta charset="UTF-8">
         <title>Followed Artists</title>
-        <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
         <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
         <link rel="stylesheet" type="text/css" href="static/style.css">
     </head>
-
     <body>
-            <nav class="navbar navbar-default" style="background-color: #191414; border-bottom: 2px solid #1ed760;">
+        <nav class="navbar navbar-default" style="background-color: #191414; border-bottom: 2px solid #1ed760; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
         <div class="container-fluid">
             <div class="navbar-header">
-                <a class="navbar-brand" href="#" style="color: #1ed760;">Spotify Popularity Tracker</a>
+            <a class="navbar-brand" href="/" style="color: #1ed760; font-weight: bold;">
+                <i class="fa fa-spotify" style="margin-right:8px;"></i>Spotify Popularity Tracker
+            </a>
             </div>
             <ul class="nav navbar-nav">
-                <li class="active"><a href="/" style="color: #1ed760;">Artists</a></li>
-                <li><a href="#" style="color: #1ed760;">Stats</a></li>
-                <li><a href="/privacy" style="color: #1ed760;">Privacy</a></li>
+            <li class="active"><a href="/" style="color: #1ed760; font-weight: bold;">Artists</a></li>
+            <li><a href="#" style="color: #1ed760;">Stats</a></li>
+            <li><a href="/privacy" style="color: #1ed760;">Privacy</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
-                <li><a href="/logout" style="color: #dc3545;">Logout</a></li>
+            <li><a href="/logout" style="color: #dc3545; font-weight: bold;">Logout</a></li>
             </ul>
         </div>
-    </nav>
+        </nav>
 
-        <!-- <h1>
-            <span id="most-popular">Most Popular: <%= scores[0] %></span>     
-            <span id="least-popular">Least Popular: <%= scores[1] %></span>       
-            <span id="average-popular">Average Popularity: <%= scores[2] %></span>
-        </h1> -->
-
-        <div class="artist_table">
-        <table class="table table-inverse" id="artist_info">
-            <thead>
-                <tr>
-                    <th>Artist Name</th>
-                    <th>Popularity Score</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% for(var i=0; i < artist_info.length; i++) { %>
-                <tr>
-                    <td><img src="<%= artist_info[i].image %>" alt="<%= artist_info[i].name %>" style="width: 50px; height: 50px; border-radius: 50%; margin-right: 10px;"><%= artist_info[i].name %></td>
-                    <td><%= artist_info[i].popularity %></td>
-                </tr>
-                <% } %>
-            </tbody>
-            </table>
-        </div>
+<div id="artists-list">
+    <input class="search" placeholder="Search artists..." style="margin:20px 0; padding:6px; border-radius:4px; border:1px solid #282828;">
+    <table class="table artist-table">
+        <thead>
+            <tr>
+                <th class="sort" data-sort="artist-name">Artist Name</th>
+                <th class="sort" data-sort="popularity">Popularity Score</th>
+            </tr>
+        </thead>
+        <tbody class="list">
+            <% for(var i=0; i < artist_info.length; i++) { %>
+            <tr>
+                <td class="artist-name">
+                    <img src="<%= artist_info[i].image %>" alt="<%= artist_info[i].name %>" style="width: 50px; height: 50px; border-radius: 50%; margin-right: 10px;">
+                    <%= artist_info[i].name %>
+                </td>
+                <td class="popularity"><%= artist_info[i].popularity %></td>
+            </tr>
+            <% } %>
+        </tbody>
+    </table>
+</div>
 
         <footer>
             <p style="color: #1ed760;">Creator: Owain Hughes. This app is in no way affiliated with or endorsed by Spotify         
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-spotify" viewBox="0 0 16 16">
                 <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm3.669 11.538a.498.498 0 0 1-.686.165c-1.879-1.147-4.243-1.407-7.028-.77a.499.499 0 0 1-.222-.973c3.048-.696 5.662-.397 7.77.892a.5.5 0 0 1 .166.686zm.979-2.178a.624.624 0 0 1-.858.205c-2.15-1.321-5.428-1.704-7.972-.932a.625.625 0 0 1-.362-1.194c2.905-.881 6.517-.454 8.986 1.063a.624.624 0 0 1 .206.858zm.084-2.268C10.154 5.56 5.9 5.419 3.438 6.166a.748.748 0 1 1-.434-1.432c2.825-.857 7.523-.692 10.492 1.07a.747.747 0 1 1-.764 1.288z"/>
                 </svg></p>
-          </footer> 
+        </footer> 
 
     <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.1/handlebars.min.js"></script>
     <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/2.3.1/list.min.js"></script>
     <script>
-        $('#artist_info').DataTable();
-    </script>
+        var options = {
+        valueNames: [ 'artist-name', 'popularity' ]
+        };
+        var artistList = new List('artists-list', options);
+        </script>
     </body>
 </html>
