@@ -2,14 +2,14 @@ export interface APIError extends Error {
     statusCode?: number;
 }
 
-export interface Artist {
+export interface Album {
     name: string;
-    popularity: number;
+    artists: string;
     image: string;
 }
 
 export interface CacheEntry {
-    data: Artist[];
+    data: Album[];
     timestamp: number;
 }
 export class SpotifyAPIError extends Error {

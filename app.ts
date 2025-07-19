@@ -1,4 +1,4 @@
-import { APIError, Artist, CacheEntry } from './types/interfaces';
+import { APIError, Album, CacheEntry } from './types/interfaces';
 import express, { Request, Response } from 'express';
 import request from 'request';
 import cors from 'cors';
@@ -7,10 +7,11 @@ import cookieParser from 'cookie-parser';
 import path from 'path';
 import dotenv from 'dotenv';
 import session from 'express-session';
+import fs from 'fs';
 dotenv.config();
 
 // Different paths for local/prod since vercel needs dist/app.js
-const views_path = process.env.VERCEL 
+const views_path = process.env.VERCEL
     ? path.join('/var/task', 'templates')  // Vercel serverless path
     : path.join(__dirname, 'templates');
 
@@ -19,7 +20,7 @@ declare module 'express-session' {
         access_token?: string;
     }
 }
-const artistCache: Map<string, CacheEntry> = new Map();
+const albumCache: Map<string, CacheEntry> = new Map();
 const CACHE_DURATION = 1000 * 60 * 15; // 15 minutes
 
 // Building the app
@@ -32,17 +33,17 @@ app.use(express.static(path.join(__dirname, '..', 'templates')))
         secret: process.env.cookie_secret as string,
         resave: false,
         saveUninitialized: true,
-        cookie: {maxAge: 7 * 24 * 60 * 60 * 1000} 
+        cookie: { maxAge: 7 * 24 * 60 * 60 * 1000 } // A week
     }))
     .engine('html', require('ejs').renderFile)
     .set('view engine', 'html')
     .set('views', views_path)
     .use((err: APIError, req: Request, res: Response, _next: any) => {
-    console.error(err.stack);
-    const statusCode = err.statusCode || 500;
-    res.status(statusCode).json({
-        error: err.message || 'Internal Server Error',
-        status: statusCode
+        console.error(err.stack);
+        const statusCode = err.statusCode || 500;
+        res.status(statusCode).json({
+            error: err.message || 'Internal Server Error',
+            status: statusCode
         });
     });
 
@@ -53,7 +54,7 @@ const redirect_uri = process.env.NODE_ENV === 'production'
 const client_id = process.env.client_id as string
 const client_secret = process.env.client_secret as string;
 const state_key = 'spotify_auth_state';
-const scope = 'user-follow-read';
+const scope = 'user-library-read';
 
 // Function that generates a random string to use as the app's state as a security measure
 const generate_random_string = (): string => {
@@ -113,9 +114,9 @@ app.get('/callback', (req: Request, res: Response) => {
                 const access_token = body.access_token;
 
                 try {
-                    const artist_info = await get_all_followed(access_token);
-                    const data = Object.values(artist_info).map((item: any) => item.popularity);
-                    const scores = get_score_stats(data);
+                    const album_info = await get_all_albums(access_token);
+                    const data = Object.values(album_info).map((item: any) => item.popularity);
+                    //const scores = get_score_stats(data);
                     req.session.access_token = access_token;
                     res.cookie('logged_in', 'true', { maxAge: 7 * 24 * 60 * 60 * 1000, httpOnly: false });
                     res.redirect('/');
@@ -127,29 +128,13 @@ app.get('/callback', (req: Request, res: Response) => {
     }
 });
 
-//app.get('/artists', async (req: Request, res: Response) => {
-//    if (req.cookies.logged_in === 'true' && req.session.access_token) {
-//        try {
-//            const artist_info = await get_all_followed(req.session.access_token);
-//            const data = Object.values(artist_info).map((item: any) => item.popularity);
-//            const scores = get_score_stats(data);
-//            res.render('artists.html', { artist_info, scores });
-//        } catch (err) {
-//            console.error(err);
-//            res.redirect('/');
-//        }
-//    } else {
-//        res.redirect('/');
-//    }
-//});
-
 app.get('/', async (req: Request, res: Response) => {
     if (req.cookies.logged_in === 'true' && req.session.access_token) {
         try {
-            const artist_info = await get_all_followed(req.session.access_token);
-            const data = Object.values(artist_info).map((item: any) => item.popularity);
-            const scores = get_score_stats(data);
-            res.render('artists.html', { artist_info, scores });
+            const album_info = await get_all_albums(req.session.access_token);
+            const data = Object.values(album_info).map((item: any) => item.popularity);
+            //const scores = get_score_stats(data);
+            res.render('albums.html', { album_info }); //and scores
         } catch (err) {
             console.error(err);
             res.redirect('/');
@@ -168,8 +153,8 @@ app.get('/privacy', (req: Request, res: Response) => {
     res.sendFile(path.join(__dirname, 'templates', 'privacy.html'));
 });
 
-async function get_all_followed(access_token: string): Promise<Artist[]> {
-    const cached = artistCache.get(access_token);
+async function get_all_albums(access_token: string): Promise<Album[]> {
+    const cached = albumCache.get(access_token);
     const now = Date.now();
 
     if (cached && (now - cached.timestamp) < CACHE_DURATION) {
@@ -178,31 +163,37 @@ async function get_all_followed(access_token: string): Promise<Artist[]> {
     const limit = 50;
     let offset = 0;
     let total = 1;
-    const artists: any[] = [];
+    const albums: any[] = [];
 
-    const get_artists = async () => {
-        while (artists.length < total) {
-            const response = await fetch(`https://api.spotify.com/v1/me/following?type=artist&limit=${limit}&offset=${offset}`, {
+    const get_albums = async () => {
+        while (albums.length < total) {
+            const response = await fetch(`https://api.spotify.com/v1/me/albums?limit=${limit}&offset=${offset}`, {
                 headers: {
                     'Authorization': 'Bearer ' + access_token
                 }
             });
 
             const data = await response.json();
-            total = data.artists.total;
+            console.log(data)
+            total = data.total;
             offset += limit;
-            artists.push(...data.artists.items);
+            albums.push(...data.items);
         }
-        return artists;
+        return albums;
     };
 
-    const artist_data = await get_artists();
-    const artist_info: Artist[] = artist_data.map((artist: any) => ({ name: artist.name, popularity: artist.popularity, image: artist.images[0]?.url || ''}));
-    artistCache.set(access_token, {
-        data: artist_info,
+    const album_data = await get_albums();
+    const album_info: Album[] = album_data.map((item: any) => ({
+        name: item.album.name,
+        artists: item.album.artists.map((artist: any) => artist.name).join(', '),
+        image: item.album.images && item.album.images.length > 0 ? item.album.images[0].url : ''
+    }));
+    albumCache.set(access_token, {
+        data: album_info,
         timestamp: now
     });
-    return artist_info;
+    console.log(album_info);
+    return album_info;
 }
 
 // Find the lowest, highest and average score, used for statistics on a users library
@@ -217,7 +208,7 @@ function get_score_stats(data: number[]): [number, number, number] {
         if (data[i] < lowest) {
             lowest = data[i];
         }
-        sum = sum + data[i];
+        sum += data[i];
     }
     return [highest, lowest, Math.round(sum / data.length)];
 }

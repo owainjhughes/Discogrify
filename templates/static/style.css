@@ -42,7 +42,7 @@ footer {
     left: 37%;
 }
 
-.artist-table {
+.album-table {
     margin: 40px auto 0 auto;
     max-width: 900px;
     background: #181818;
@@ -51,7 +51,7 @@ footer {
     padding: 16px;
 }
 
-.artist-table th, .artist-table td {
+.album-table th, .album-table td {
     color: #fff !important;
     background: transparent !important;
     border: none;
@@ -59,7 +59,7 @@ footer {
     vertical-align: middle;
 }
 
-.artist-table th {
+.album-table th {
     background: #282828 !important;
     color: #1ed760 !important;
     font-size: 1.1em;
@@ -68,11 +68,11 @@ footer {
     border-top-right-radius: 8px;
 }
 
-.artist-table tr:hover {
+.album-table tr:hover {
     background: #232323 !important;
 }
 
-.artist-table img {
+.album-table img {
     object-fit: cover;
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     transition: transform 0.2s;
@@ -100,11 +100,11 @@ input.search:focus {
 }
 
 @media (max-width: 700px) {
-    .artist-table {
+    .album-table {
         padding: 8px;
         font-size: 0.95em;
     }
-    .artist-table th, .artist-table td {
+    .album-table th, .album-table td {
         padding: 8px 4px;
     }
     input.search {
@@ -128,6 +128,7 @@ input.search:focus {
     margin-bottom: 2rem;
     background: linear-gradient(to right, #1DB954, #1ED760);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
