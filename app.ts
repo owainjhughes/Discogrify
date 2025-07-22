@@ -140,7 +140,7 @@ app.get('/', async (req: Request, res: Response) => {
             res.redirect('/');
         }
     } else {
-        res.sendFile(path.join(__dirname, 'templates', 'index.html'));
+        res.render('index.html');
     }
 });
 
@@ -150,7 +150,7 @@ app.get('/logout', (req: Request, res: Response) => {
 });
 
 app.get('/privacy', (req: Request, res: Response) => {
-    res.sendFile(path.join(__dirname, 'templates', 'privacy.html'));
+    res.render('privacy.html');
 });
 
 async function get_all_albums(access_token: string): Promise<Album[]> {

@@ -1,0 +1,23 @@
+<nav class="navbar navbar-default" style="background-color: #191414; border-bottom: 2px solid #1ed760; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="/" style="color: #1ed760; font-weight: bold;">
+                <i class="fa fa-spotify" style="margin-right:8px;"></i>Spotify Popularity Tracker
+            </a>
+        </div>
+        <ul class="nav navbar-nav">
+            <li class="<%= currentPage === 'albums' ? 'active' : '' %>">
+                <a href="/" style="color: #1ed760; font-weight: bold;">Albums</a>
+            </li>
+            <li class="<%= currentPage === 'stats' ? 'active' : '' %>">
+                <a href="/stats" style="color: #1ed760;">Stats</a>
+            </li>
+            <li class="<%= currentPage === 'privacy' ? 'active' : '' %>">
+                <a href="/privacy" style="color: #1ed760;">Privacy</a>
+            </li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+            <li><a href="/logout" style="color: #dc3545; font-weight: bold;">Logout</a></li>
+        </ul>
+    </div>
+</nav>

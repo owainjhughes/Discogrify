@@ -1,33 +1,11 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <title>Privacy Policy</title>
-        <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
-        <link rel="stylesheet" type="text/css" href="static/style.css">
-    </head>
-    <body>
-            <nav class="navbar navbar-default" style="background-color: #191414; border-bottom: 2px solid #1ed760;">
-        <div class="container-fluid">
-            <div class="navbar-header">
-                <a class="navbar-brand" href="#" style="color: #1ed760;">Spotify Popularity Tracker</a>
-            </div>
-            <ul class="nav navbar-nav">
-                <li><a href="/" style="color: #1ed760;">Artists</a></li>
-                <li><a href="#" style="color: #1ed760;">Stats</a></li>
-                <li class="active"><a href="#" style="color: #1ed760;">Privacy</a></li>
-            </ul>
-            <ul class="nav navbar-nav navbar-right">
-                <li><a href="/logout" style="color: #dc3545;">Logout</a></li>
-            </ul>
-        </div>
-    </nav>
+<%- include('partials/head.html', { title: 'Privacy Policy' }) %>
+<%- include('partials/navbar.html', { currentPage: 'privacy' }) %>
         <div class="container" style="color: aliceblue;">
             <h1>Privacy Policy</h1>
             <p>This application does not save any data used to log into your Spotify account. This application is open-source and can be viewed at it's <a href="https://github.com/owainjhughes/spotify-popularity-tracker">Github Repository</a></p>
         </div>
 
-        <footer>
-            <p style="color: #1ed760;">Creator: Owain Hughes. This app is in no way affiliated with or endorsed by Spotify         
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-spotify" viewBox="0 0 16 16">
-                <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm3.669 11.538a.498.498 0 0 1-.686.165c-1.879-1.147-4.243-1.407-7.028-.77a.499.499 0 0 1-.222-.973c3.048-.696 5.662-.397 7.77.892a.5.5 0 0 1 .166.686zm.979-2.178a.624.624 0 0 1-.858.
+<%- include('partials/footer.html') %>
+<%- include('partials/scripts.html') %>
+</body>
+</html>
