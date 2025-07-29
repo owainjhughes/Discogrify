@@ -1,6 +1,60 @@
 <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0-alpha.1/handlebars.min.js"></script>
 <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+<script>
+// Sync functionality
+$(document).ready(function() {
+    $('#syncButton').click(function(e) {
+        e.preventDefault();
+        
+        const $button = $(this);
+        const $icon = $button.find('i');
+        const originalText = $button.html();
+        
+        // Show loading state
+        $button.html('<i class="fa fa-spinner fa-spin" style="margin-right: 5px;"></i>Syncing...');
+        $button.css('pointer-events', 'none');
+        
+        // Make sync request
+        $.ajax({
+            url: '/sync',
+            method: 'POST',
+            success: function(response) {
+                // Show success message
+                $button.html('<i class="fa fa-check" style="margin-right: 5px; color: #28a745;"></i>Synced!');
+                
+                // Show success notification
+                if (response.albumCount) {
+                    alert(`Successfully synced ${response.albumCount} albums from your Spotify library!`);
+                }
+                
+                // Reload page to show updated albums
+                setTimeout(function() {
+                    window.location.reload();
+                }, 1500);
+            },
+            error: function(xhr) {
+                // Show error state
+                $button.html('<i class="fa fa-exclamation-triangle" style="margin-right: 5px; color: #dc3545;"></i>Error');
+                
+                let errorMessage = 'Failed to sync albums. Please try again.';
+                if (xhr.responseJSON && xhr.responseJSON.error) {
+                    errorMessage = xhr.responseJSON.error;
+                }
+                alert(errorMessage);
+                
+                // Reset button after 3 seconds
+                setTimeout(function() {
+                    $button.html(originalText);
+                    $button.css('pointer-events', 'auto');
+                }, 3000);
+            }
+        });
+    });
+});
+</script>
+
 <% if (typeof additionalScripts !== 'undefined') { %>
     <%- additionalScripts %>
 <% } %>

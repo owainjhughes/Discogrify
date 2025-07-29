@@ -1,27 +1,15 @@
 {
   "version": 2,
-  "buildCommand": "npm run vercel-build",
-  "outputDirectory": "dist",
   "builds": [
-    { 
-      "src": "app.ts",
+    {
+      "src": "dist/app.js",
       "use": "@vercel/node"
-    },
-    { 
-      "src": "templates/**", 
-      "use": "@vercel/static",
-      "config": {
-        "zeroConfig": true
-      }
     }
   ],
   "routes": [
-    { "src": "/static/(.*)", "dest": "/templates/static/$1" },
-    { "src": "/login", "dest": "/app.ts" },
-    { "src": "/callback", "dest": "/app.ts" },
-    { "src": "/", "dest": "/app.ts" },
-    { "src": "/artists", "dest": "/app.ts" },
-    { "src": "/logout", "dest": "/app.ts" },
-    { "src": "/(.*)", "dest": "/app.ts" }
+    {
+      "src": "/(.*)",
+      "dest": "dist/app.js"
+    }
   ]
 }

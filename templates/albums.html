@@ -9,16 +9,24 @@
                 <th class="sort" data-sort="album-cover">Album Cover</th>
                 <th class="sort" data-sort="album-name">Album Name</th>
                 <th class="sort" data-sort="artists">Artists</th>
+                <th class="sort" data-sort="rating">Rating</th>
             </tr>
         </thead>
         <tbody class="list">
             <% for(var i=0; i < album_info.length; i++) { %>
             <tr>
                 <td class="album-cover">
-                <img src="<%= album_info[i].image %>" alt="<%= album_info[i].name %>" style="width: 50px; height: 50px; border-radius: 4px; margin-right: 10px;">
+                    <img src="<%= album_info[i].image %>" alt="<%= album_info[i].name %>" style="width: 50px; height: 50px; border-radius: 4px; margin-right: 10px;">
                 </td>
-                <td class="album-name"> <%= album_info[i].name %></td>
+                <td class="album-name"><%= album_info[i].name %></td>
                 <td class="artists"><%= album_info[i].artists %></td>
+                <td class="rating">
+                    <% if (album_info[i].rating) { %>
+                        <span style="color: #1ed760; font-weight: bold;"><%= album_info[i].rating %></span>
+                    <% } else { %>
+                        <span style="color: #888;">N/A</span>
+                    <% } %>
+                </td>
             </tr>
             <% } %>
         </tbody>
@@ -31,7 +39,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/2.3.1/list.min.js"></script>
     <script>
         var options = {
-            valueNames: [ 'album-name', 'artists' ]
+            valueNames: [ 'album-name', 'artists', 'rating' ]
         };
         var albumList = new List('albums-list', options);
     </script>

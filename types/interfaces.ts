@@ -6,6 +6,7 @@ export interface Album {
     name: string;
     artists: string;
     image: string;
+    rating?: number;
 }
 
 export interface CacheEntry {
