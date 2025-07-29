@@ -2,7 +2,15 @@ import Database from 'better-sqlite3';
 import { Album } from './types/interfaces';
 
 const dbPath = process.env.NODE_ENV === 'production' ? '/tmp/ratings.db' : './ratings.db';
-const db = new Database(dbPath);
+let db: Database.Database;
+
+try {
+    db = new Database(dbPath);
+    console.log('Database initialized successfully');
+} catch (error) {
+    console.error('Database initialization failed:', error);
+    throw error;
+}
 
 // Table inits
 db.exec(`
