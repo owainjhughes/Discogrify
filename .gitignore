@@ -1,4 +1,5 @@
 /node_modules
 /dist
 .env
-test.ts
+ratings.db
+*.db

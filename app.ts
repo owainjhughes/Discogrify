@@ -12,8 +12,8 @@ import { AlbumService } from './services';
 dotenv.config();
 
 // Different paths for local/prod since vercel needs dist/app.js
-const views_path = process.env.VERCEL
-    ? path.join('/var/task', 'templates')  // Vercel serverless path
+const views_path = process.env.NODE_ENV === 'production'
+    ? path.join(__dirname, 'templates')  // Production path (templates are in dist/templates)
     : path.join(__dirname, 'templates');
 
 declare module 'express-session' {
@@ -27,7 +27,7 @@ const CACHE_DURATION = 1000 * 60 * 15; // 15 minutes
 
 // Building the app
 const app = express();
-app.use(express.static(path.join(__dirname, '..', 'templates')))
+app.use(express.static(path.join(__dirname, 'templates')))
     .use('/static', express.static(path.join(__dirname, 'templates', 'static')))
     .use(cors())
     .use(cookieParser())
@@ -198,6 +198,16 @@ if (process.env.NODE_ENV !== 'production') {
         });
     });
 }
+
+app.use((req, res, next) => {
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+    next();
+});
+
+app.use((err: any, req: any, res: any, next: any) => {
+    console.error('Unhandled error:', err);
+    res.status(500).json({ error: 'Internal server error', details: err.message });
+});
 
 // This is required for Vercel
 module.exports = app;
