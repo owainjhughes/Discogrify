@@ -3,3 +3,4 @@
 .env
 ratings.db
 *.db
+.vscode
