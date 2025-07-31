@@ -13,22 +13,31 @@ console.log('Database config:', {
 });
 
 const pool = new Pool({
-    host: process.env.NODE_ENV === 'production' 
-        ? process.env.POSTGRES_HOST 
+    host: process.env.NODE_ENV === 'production'
+        ? process.env.POSTGRES_HOST
         : 'aws-0-eu-west-2.pooler.supabase.com',
-    port: parseInt(process.env.NODE_ENV === 'production' 
-        ? process.env.POSTGRES_PORT || '5432' 
+    port: parseInt(process.env.NODE_ENV === 'production'
+        ? process.env.POSTGRES_PORT || '5432'
         : '6543'),
     database: process.env.POSTGRES_DATABASE,
-    user: process.env.NODE_ENV === 'production' 
-        ? process.env.POSTGRES_USER 
+    user: process.env.NODE_ENV === 'production'
+        ? process.env.POSTGRES_USER
         : 'postgres.vsgcnxzclxdujjgkmuha',
     password: process.env.POSTGRES_PASSWORD,
     ssl: { rejectUnauthorized: false },
 });
 
-// Initialize database tables
+let dbInitialized = false;
+
+async function ensureInitialized() {
+    if (!dbInitialized) {
+        await initializeDatabase();
+    }
+}
+
 async function initializeDatabase() {
+    if (dbInitialized) return;
+
     try {
         const client = await pool.connect();
         try {
@@ -73,8 +82,6 @@ async function initializeDatabase() {
     }
 }
 
-initializeDatabase();
-
 interface DatabaseRating {
     rating: number | null;
 }
@@ -84,6 +91,7 @@ export const DatabaseOperations = {
     // Rating operations
     async getRating(albumName: string, artistName: string): Promise<number | null | undefined> {
         try {
+            await ensureInitialized();
             const client = await pool.connect();
             try {
                 const lowerAlbum = albumName.toLowerCase();
@@ -252,4 +260,13 @@ export const DatabaseOperations = {
             const client = await pool.connect();
             try {
                 await client.query('UPDATE user_albums SET user_id = $1 WHERE user_id = $2', [newUserId, oldUserId]);
-                console.log(`Migrated user_alb
+                console.log(`Migrated user_albums from ${oldUserId} to ${newUserId}`);
+            } finally {
+                client.release();
+            }
+        } catch (error) {
+            console.error('Database error in migrateUserData:', error);
+            throw error;
+        }
+    }
+};
