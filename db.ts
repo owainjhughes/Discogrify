@@ -1,14 +1,30 @@
+import dotenv from 'dotenv';
+dotenv.config();
 import { Pool, PoolClient } from 'pg';
 import { Album } from './types/interfaces';
 
 // PostgreSQL connection configuration
-const pool = new Pool({
+console.log('Database config:', {
     host: process.env.POSTGRES_HOST,
-    port: parseInt(process.env.POSTGRES_PORT || '5432'),
+    port: process.env.POSTGRES_PORT,
     database: process.env.POSTGRES_DATABASE,
     user: process.env.POSTGRES_USER,
+    password: process.env.POSTGRES_PASSWORD ? '[REDACTED]' : 'undefined'
+});
+
+const pool = new Pool({
+    host: process.env.NODE_ENV === 'production' 
+        ? process.env.POSTGRES_HOST 
+        : 'aws-0-eu-west-2.pooler.supabase.com',
+    port: parseInt(process.env.NODE_ENV === 'production' 
+        ? process.env.POSTGRES_PORT || '5432' 
+        : '6543'),
+    database: process.env.POSTGRES_DATABASE,
+    user: process.env.NODE_ENV === 'production' 
+        ? process.env.POSTGRES_USER 
+        : 'postgres.vsgcnxzclxdujjgkmuha',
     password: process.env.POSTGRES_PASSWORD,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+    ssl: { rejectUnauthorized: false },
 });
 
 // Initialize database tables
@@ -229,5 +245,11 @@ export const DatabaseOperations = {
         } finally {
             client.release();
         }
-    }
-};
+    },
+
+    async migrateUserData(oldUserId: string, newUserId: string): Promise<void> {
+        try {
+            const client = await pool.connect();
+            try {
+                await client.query('UPDATE user_albums SET user_id = $1 WHERE user_id = $2', [newUserId, oldUserId]);
+                console.log(`Migrated user_alb

@@ -1,3 +1,5 @@
+import dotenv from 'dotenv';
+dotenv.config();
 import { APIError, Album, CacheEntry } from './types/interfaces';
 import express, { Request, Response } from 'express';
 import request from 'request';
@@ -5,11 +7,9 @@ import cors from 'cors';
 import querystring from 'querystring';
 import cookieParser from 'cookie-parser';
 import path from 'path';
-import dotenv from 'dotenv';
 import session from 'express-session';
 import { DatabaseOperations } from './db';
 import { AlbumService } from './services';
-dotenv.config();
 
 // Different paths for local/prod since vercel needs dist/app.js
 const views_path = process.env.VERCEL
@@ -34,8 +34,12 @@ app.use(express.static(path.join(__dirname, '..', 'templates')))
     .use(session({
         secret: process.env.cookie_secret as string,
         resave: false,
-        saveUninitialized: true,
-        cookie: { maxAge: 7 * 24 * 60 * 60 * 1000 } // A week
+        saveUninitialized: false,
+        cookie: {
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+            secure: process.env.NODE_ENV === 'production',
+            httpOnly: true
+        }
     }))
     .engine('html', require('ejs').renderFile)
     .set('view engine', 'html')
@@ -153,8 +157,7 @@ app.post('/sync', async (req: Request, res: Response): Promise<void> => {
     }
 
     try {
-        const userId = req.session.access_token.substring(0, 20);
-        const albums = await AlbumService.syncAlbumsFromSpotify(req.session.access_token, userId);
+        const albums = await AlbumService.syncAlbumsFromSpotify(req.session.access_token);
         res.json({
             success: true,
             message: `Synced ${albums.length} albums`,

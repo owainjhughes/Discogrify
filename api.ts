@@ -36,6 +36,16 @@ class DiscogsRateLimiter {
 const discogsRateLimiter = new DiscogsRateLimiter();
 
 export const APIOperations = {
+    async fetchSpotifyUser(access_token: string): Promise<string> {
+        const response = await fetch('https://api.spotify.com/v1/me', {
+            headers: {
+                'Authorization': 'Bearer ' + access_token
+            }
+        });
+        const userData = await response.json();
+        return userData.id;
+    },
+
     async fetchSpotifyAlbums(access_token: string): Promise<any[]> {
         const limit = 50;
         let offset = 0;

@@ -37,7 +37,8 @@ export const AlbumService = {
         return albums;
     },
 
-    async syncAlbumsFromSpotify(access_token: string, userId: string): Promise<Album[]> {
+    async syncAlbumsFromSpotify(access_token: string, userIdParam?: string): Promise<Album[]> {
+        const userId = userIdParam || await APIOperations.fetchSpotifyUser(access_token);
         console.log(`Syncing albums from Spotify for user ${userId}`);
         const album_data = await APIOperations.fetchSpotifyAlbums(access_token);
 
@@ -86,20 +87,32 @@ export const AlbumService = {
     },
 
     async getAllAlbums(access_token: string): Promise<Album[]> {
-        // Use access token as user ID for now (just first 20 chars, actual ID preferable in prod)
-        const userId = access_token.substring(0, 20);
+        const spotifyUserId = await APIOperations.fetchSpotifyUser(access_token);
+        const oldUserId = access_token.substring(0, 20);
+        console.log(`Spotify user ID: ${spotifyUserId}, Old user ID: ${oldUserId}`);
 
-        // Always try to load from database first
-        const existingAlbums = await this.getUserAlbumsFromDatabase(userId);
+        // Try new user ID first
+        let existingAlbums = await this.getUserAlbumsFromDatabase(spotifyUserId);
+        console.log(`Found ${existingAlbums.length} albums for new user ID`);
+
+        // If no albums found, try old user ID for backward compatibility
+        if (existingAlbums.length === 0) {
+            existingAlbums = await this.getUserAlbumsFromDatabase(oldUserId);
+            console.log(`Found ${existingAlbums.length} albums for old user ID`);
+            
+            // If found with old ID, migrate to new ID
+            if (existingAlbums.length > 0) {
+                console.log(`Migrating data from old user ID to new user ID`);
+                await this.migrateUserData(oldUserId, spotifyUserId);
+                existingAlbums = await this.getUserAlbumsFromDatabase(spotifyUserId);
+            }
+        }
 
         if (existingAlbums.length > 0) {
-            // User has albums in database, return them
             return existingAlbums;
         } else {
-            // No albums in database - this is a new user
-            // Just fetch from Spotify and store basic album info (no ratings yet)
-            console.log(`New user detected, fetching basic album info from Spotify for user ${userId}`);
-            return await this.fetchAndStoreBasicAlbums(access_token, userId);
+            console.log(`New user detected, fetching basic album info from Spotify for user ${spotifyUserId}`);
+            return await this.fetchAndStoreBasicAlbums(access_token, spotifyUserId);
         }
     },
 
@@ -144,5 +157,14 @@ export const AlbumService = {
 
         console.log(`Stored ${album_info.length} albums in database for user ${userId} (no ratings fetched)`);
         return album_info;
+    },
+
+    async migrateUserData(oldUserId: string, newUserId: string): Promise<void> {
+        try {
+            await DatabaseOperations.migrateUserData(oldUserId, newUserId);
+            console.log(`Successfully migrated user data from ${oldUserId} to ${newUserId}`);
+        } catch (error) {
+            console.error('Failed to migrate user data:', error);
+        }
     }
 };
