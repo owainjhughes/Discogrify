@@ -289,7 +289,7 @@ export const APIOperations = {
     // Checks if rating is in DB, if not, fetch from API
     async getRatingWithDatabase(albumName: string, artistName: string): Promise<number | null> {
         console.log(`API getRatingWithDatabase: Checking for "${albumName}" by "${artistName}"`);
-        const dbRating = DatabaseOperations.getRating(albumName, artistName);
+        const dbRating = await DatabaseOperations.getRating(albumName, artistName);
 
         // Undefined = not in DB, null = in DB but no rating
         if (dbRating !== undefined) {
@@ -309,7 +309,7 @@ export const APIOperations = {
         } else {
             console.log(`${albumName} by ${artistName}: No rating found on Discogs, saving null to database`);
         }
-        DatabaseOperations.saveRating(albumName, artistName, apiResult);
+        await DatabaseOperations.saveRating(albumName, artistName, apiResult);
 
         return apiResult;
     }

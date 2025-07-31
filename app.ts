@@ -191,9 +191,9 @@ if (process.env.NODE_ENV !== 'production') {
 
     process.on('SIGTERM', () => {
         console.log('Closing HTTP server');
-        server.close(() => {
+        server.close(async () => {
             console.log('HTTP server closed');
-            DatabaseOperations.close();
+            await DatabaseOperations.close();
             process.exit(0);
         });
     });

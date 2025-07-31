@@ -4,13 +4,13 @@ import { APIOperations } from './api';
 
 export const AlbumService = {
     async getUserAlbumsFromDatabase(userId: string): Promise<Album[]> {
-        const userAlbums = DatabaseOperations.getUserAlbums(userId);
+        const userAlbums = await DatabaseOperations.getUserAlbums(userId);
         const albums: Album[] = [];
 
         // Debug: Show what ratings are in the database (only in development)
         if (process.env.NODE_ENV !== 'production') {
             console.log(`Debug: Checking ratings in database...`);
-            DatabaseOperations.debugShowAllRatings();
+            await DatabaseOperations.debugShowAllRatings();
         }
 
         for (const dbAlbum of userAlbums) {
@@ -22,7 +22,7 @@ export const AlbumService = {
             const primaryArtist = dbAlbum.primary_artist || dbAlbum.artist_name.split(', ')[0]; // fallback for old data
 
             console.log(`Looking up rating for: "${dbAlbum.album_name}" by "${primaryArtist}" (stored primary: "${dbAlbum.primary_artist}")`);
-            const rating = DatabaseOperations.getRating(dbAlbum.album_name, primaryArtist);
+            const rating = await DatabaseOperations.getRating(dbAlbum.album_name, primaryArtist);
             if (rating !== null && rating !== undefined) {
                 console.log(`Found rating ${rating} for "${dbAlbum.album_name}" by "${primaryArtist}"`);
                 album.rating = rating;
@@ -41,7 +41,7 @@ export const AlbumService = {
         console.log(`Syncing albums from Spotify for user ${userId}`);
         const album_data = await APIOperations.fetchSpotifyAlbums(access_token);
 
-        DatabaseOperations.clearUserAlbums(userId);
+        await DatabaseOperations.clearUserAlbums(userId);
 
         const album_info: Album[] = [];
 
@@ -54,7 +54,7 @@ export const AlbumService = {
             const primaryArtist = item.album.artists[0]?.name || '';
             const albumImage = item.album.images && item.album.images.length > 0 ? item.album.images[0].url : '';
 
-            DatabaseOperations.saveUserAlbum(
+            await DatabaseOperations.saveUserAlbum(
                 userId,
                 albumName,
                 artistsString,
@@ -93,18 +93,23 @@ export const AlbumService = {
         const existingAlbums = await this.getUserAlbumsFromDatabase(userId);
 
         if (existingAlbums.length > 0) {
+            // User has albums in database, return them
             return existingAlbums;
         } else {
+            // No albums in database - this is a new user
+            // Just fetch from Spotify and store basic album info (no ratings yet)
             console.log(`New user detected, fetching basic album info from Spotify for user ${userId}`);
             return await this.fetchAndStoreBasicAlbums(access_token, userId);
         }
     },
 
+    // New method to fetch albums from Spotify without rating API calls
     async fetchAndStoreBasicAlbums(access_token: string, userId: string): Promise<Album[]> {
         console.log(`Fetching basic album info from Spotify for user ${userId}`);
         const album_data = await APIOperations.fetchSpotifyAlbums(access_token);
 
-        DatabaseOperations.clearUserAlbums(userId);
+        // Clear existing albums for this user
+        await DatabaseOperations.clearUserAlbums(userId);
 
         const album_info: Album[] = [];
 
@@ -117,7 +122,8 @@ export const AlbumService = {
             const primaryArtist = item.album.artists[0]?.name || '';
             const albumImage = item.album.images && item.album.images.length > 0 ? item.album.images[0].url : '';
 
-            DatabaseOperations.saveUserAlbum(
+            // Store album in user's library (no rating fetching)
+            await DatabaseOperations.saveUserAlbum(
                 userId,
                 albumName,
                 artistsString,
@@ -130,6 +136,7 @@ export const AlbumService = {
                 name: albumName,
                 artists: artistsString,
                 image: albumImage
+                // No rating field - will show as N/A in the table
             };
 
             album_info.push(album);
