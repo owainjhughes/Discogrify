@@ -13,16 +13,10 @@ console.log('Database config:', {
 });
 
 const pool = new Pool({
-    host: process.env.NODE_ENV === 'production'
-        ? process.env.POSTGRES_HOST
-        : 'aws-0-eu-west-2.pooler.supabase.com',
-    port: parseInt(process.env.NODE_ENV === 'production'
-        ? process.env.POSTGRES_PORT || '5432'
-        : '6543'),
+    host: process.env.POSTGRES_HOST,
+    port: parseInt(process.env.POSTGRES_PORT || '5432'),
     database: process.env.POSTGRES_DATABASE,
-    user: process.env.NODE_ENV === 'production'
-        ? process.env.POSTGRES_USER
-        : 'postgres.vsgcnxzclxdujjgkmuha',
+    user: process.env.POSTGRES_USER,
     password: process.env.POSTGRES_PASSWORD,
     ssl: { rejectUnauthorized: false },
 });
