@@ -3,18 +3,20 @@ import { Album } from './types/interfaces';
 
 // PostgreSQL connection configuration
 const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
+    host: process.env.POSTGRES_HOST,
+    port: parseInt(process.env.POSTGRES_PORT || '5432'),
+    database: process.env.POSTGRES_DATABASE,
+    user: process.env.POSTGRES_USER,
+    password: process.env.POSTGRES_PASSWORD,
     ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
 });
 
 // Initialize database tables
 async function initializeDatabase() {
-    const client = await pool.connect();
     try {
-        console.log('Initializing database tables...');
-        
-        // Create album_ratings table
-        await client.query(`
+        const client = await pool.connect();
+        try {
+            await client.query(`
             CREATE TABLE IF NOT EXISTS album_ratings (
                 id SERIAL PRIMARY KEY,
                 album_name TEXT NOT NULL,
@@ -26,8 +28,7 @@ async function initializeDatabase() {
             )
         `);
 
-        // Create user_albums table
-        await client.query(`
+            await client.query(`
             CREATE TABLE IF NOT EXISTS user_albums (
                 id SERIAL PRIMARY KEY,
                 user_id TEXT NOT NULL,
@@ -42,22 +43,21 @@ async function initializeDatabase() {
             )
         `);
 
-        // Add primary_artist column if it doesn't exist (migration for existing databases)
-        try {
-            await client.query(`ALTER TABLE user_albums ADD COLUMN primary_artist TEXT`);
-        } catch (error) {
-        }
+            // Add primary_artist column if it doesn't exist (migration for existing databases)
+            try {
+                await client.query(`ALTER TABLE user_albums ADD COLUMN primary_artist TEXT`);
+            } catch (error) {
+            }
 
-        console.log('Database initialized successfully');
+        } finally {
+            client.release();
+        }
     } catch (error) {
         console.error('Database initialization failed:', error);
-        throw error;
-    } finally {
-        client.release();
     }
 }
 
-initializeDatabase().catch(console.error);
+initializeDatabase();
 
 interface DatabaseRating {
     rating: number | null;
@@ -67,29 +67,30 @@ interface DatabaseRating {
 export const DatabaseOperations = {
     // Rating operations
     async getRating(albumName: string, artistName: string): Promise<number | null | undefined> {
-        const client = await pool.connect();
         try {
-            const lowerAlbum = albumName.toLowerCase();
-            const lowerArtist = artistName.toLowerCase();
-            console.log(`DB getRating: Looking for "${lowerAlbum}" by "${lowerArtist}"`);
-            
-            const result = await client.query(
-                'SELECT rating FROM album_ratings WHERE album_name = $1 AND artist_name = $2',
-                [lowerAlbum, lowerArtist]
-            );
-            
-            if (result.rows.length === 0) {
-                console.log(`DB getRating: No entry found for "${lowerAlbum}" by "${lowerArtist}" (not in database)`);
-                return undefined; // Signal that it's not in database at all
-            } else if (result.rows[0].rating !== null) {
-                console.log(`DB getRating: Found rating ${result.rows[0].rating} for "${lowerAlbum}" by "${lowerArtist}"`);
-                return result.rows[0].rating;
-            } else {
-                console.log(`DB getRating: Found entry with null rating for "${lowerAlbum}" by "${lowerArtist}" (API was called but no rating found)`);
-                return null;
+            const client = await pool.connect();
+            try {
+                const lowerAlbum = albumName.toLowerCase();
+                const lowerArtist = artistName.toLowerCase();
+
+                const result = await client.query(
+                    'SELECT rating FROM album_ratings WHERE album_name = $1 AND artist_name = $2',
+                    [lowerAlbum, lowerArtist]
+                );
+
+                if (result.rows.length === 0) {
+                    return undefined;
+                } else if (result.rows[0].rating !== null) {
+                    return result.rows[0].rating;
+                } else {
+                    return null;
+                }
+            } finally {
+                client.release();
             }
-        } finally {
-            client.release();
+        } catch (error) {
+            console.error('Database error in getRating:', error);
+            return undefined;
         }
     },
 
@@ -99,7 +100,7 @@ export const DatabaseOperations = {
             const lowerAlbum = albumName.toLowerCase();
             const lowerArtist = artistName.toLowerCase();
             console.log(`DB saveRating: Saving rating ${rating} for "${lowerAlbum}" by "${lowerArtist}"`);
-            
+
             await client.query(`
                 INSERT INTO album_ratings (album_name, artist_name, rating, updated_at)
                 VALUES ($1, $2, $3, CURRENT_TIMESTAMP)
@@ -119,17 +120,22 @@ export const DatabaseOperations = {
         album_image: string;
         last_synced: string;
     }>> {
-        const client = await pool.connect();
         try {
-            const result = await client.query(`
-                SELECT album_name, artist_name, primary_artist, album_image, last_synced
-                FROM user_albums
-                WHERE user_id = $1
-                ORDER BY added_at DESC
-            `, [userId]);
-            return result.rows;
-        } finally {
-            client.release();
+            const client = await pool.connect();
+            try {
+                const result = await client.query(`
+                    SELECT album_name, artist_name, primary_artist, album_image, last_synced
+                    FROM user_albums
+                    WHERE user_id = $1
+                    ORDER BY added_at DESC
+                `, [userId]);
+                return result.rows;
+            } finally {
+                client.release();
+            }
+        } catch (error) {
+            console.error('Database error in getUserAlbums:', error);
+            return [];
         }
     },
 
@@ -191,7 +197,7 @@ export const DatabaseOperations = {
             const lowerArtist = artistName.toLowerCase();
             const result = await client.query('SELECT * FROM album_ratings WHERE album_name = $1 AND artist_name = $2', [lowerAlbum, lowerArtist]);
             console.log(`Debug: Checking "${lowerAlbum}" by "${lowerArtist}":`, result.rows[0] || 'Not found');
-            
+
             const similar = await client.query('SELECT * FROM album_ratings WHERE album_name LIKE $1 OR artist_name LIKE $2', [`%${lowerAlbum}%`, `%${lowerArtist}%`]);
             console.log(`Debug: Similar entries:`, similar.rows);
         } finally {
