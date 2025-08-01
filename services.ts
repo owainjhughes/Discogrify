@@ -121,9 +121,6 @@ export const AlbumService = {
         console.log(`Fetching basic album info from Spotify for user ${userId}`);
         const album_data = await APIOperations.fetchSpotifyAlbums(access_token);
 
-        // Clear existing albums for this user
-        await DatabaseOperations.clearUserAlbums(userId);
-
         const album_info: Album[] = [];
 
         console.log(`Storing ${album_data.length} albums without ratings`);
