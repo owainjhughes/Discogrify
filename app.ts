@@ -121,6 +121,12 @@ app.get('/callback', (req: Request, res: Response) => {
                 const access_token = body.access_token;
                 req.session.access_token = access_token;
                 res.cookie('logged_in', 'true', { maxAge: 7 * 24 * 60 * 60 * 1000, httpOnly: false });
+                res.cookie('access_token', access_token, { 
+                    maxAge: 7 * 24 * 60 * 60 * 1000, 
+                    httpOnly: true, 
+                    secure: process.env.NODE_ENV === 'production',
+                    sameSite: 'lax'
+                });
                 res.redirect('/');
             }
         });
@@ -128,9 +134,10 @@ app.get('/callback', (req: Request, res: Response) => {
 });
 
 app.get('/', async (req: Request, res: Response) => {
-    if (req.cookies.logged_in === 'true' && req.session.access_token) {
+    const access_token = req.session.access_token || req.cookies.access_token;
+    if (req.cookies.logged_in === 'true' && access_token) {
         try {
-            const album_info = await AlbumService.getAllAlbums(req.session.access_token);
+            const album_info = await AlbumService.getAllAlbums(access_token);
             res.render('albums.html', { album_info });
         } catch (err) {
             console.error(err);
@@ -143,6 +150,8 @@ app.get('/', async (req: Request, res: Response) => {
 
 app.get('/logout', (req: Request, res: Response) => {
     res.clearCookie('logged_in');
+    res.clearCookie('access_token');
+    req.session.destroy(() => {});
     res.redirect('/');
 });
 
@@ -151,13 +160,14 @@ app.get('/privacy', (req: Request, res: Response) => {
 });
 
 app.post('/sync', async (req: Request, res: Response): Promise<void> => {
-    if (!req.session.access_token) {
+    const access_token = req.session.access_token || req.cookies.access_token;
+    if (!access_token) {
         res.status(401).json({ error: 'Not authenticated' });
         return;
     }
 
     try {
-        const albums = await AlbumService.syncAlbumsFromSpotify(req.session.access_token);
+        const albums = await AlbumService.syncAlbumsFromSpotify(access_token);
         res.json({
             success: true,
             message: `Synced ${albums.length} albums`,
