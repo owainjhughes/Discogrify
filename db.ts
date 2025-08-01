@@ -4,41 +4,12 @@ import { Pool, PoolClient } from 'pg';
 import { Album } from './types/interfaces';
 
 // PostgreSQL connection configuration
-console.log('Database config:', {
-    host: process.env.POSTGRES_HOST,
-    port: process.env.POSTGRES_PORT,
-    database: process.env.POSTGRES_DATABASE,
-    user: process.env.POSTGRES_USER,
-    password: process.env.POSTGRES_PASSWORD ? '[REDACTED]' : 'undefined'
-});
-
-const isProduction = process.env.NODE_ENV === 'production';
-
 const pool = new Pool({
-    host: isProduction 
-        ? process.env.POSTGRES_HOST 
-        : 'aws-0-eu-west-2.pooler.supabase.com',
-    port: parseInt(isProduction 
-        ? process.env.POSTGRES_PORT || '5432' 
-        : '6543'),
-    database: process.env.POSTGRES_DATABASE,
-    user: isProduction 
-        ? process.env.POSTGRES_USER 
-        : 'postgres.vsgcnxzclxdujjgkmuha',
-    password: process.env.POSTGRES_PASSWORD,
+    connectionString: process.env.DATABASE_URL,
     ssl: { rejectUnauthorized: false },
 });
 
-let dbInitialized = false;
-
-async function ensureInitialized() {
-    if (!dbInitialized) {
-        await initializeDatabase();
-    }
-}
-
 async function initializeDatabase() {
-    if (dbInitialized) return;
 
     try {
         const client = await pool.connect();
@@ -84,6 +55,8 @@ async function initializeDatabase() {
     }
 }
 
+initializeDatabase();
+
 interface DatabaseRating {
     rating: number | null;
 }
@@ -93,7 +66,6 @@ export const DatabaseOperations = {
     // Rating operations
     async getRating(albumName: string, artistName: string): Promise<number | null | undefined> {
         try {
-            await ensureInitialized();
             const client = await pool.connect();
             try {
                 const lowerAlbum = albumName.toLowerCase();
