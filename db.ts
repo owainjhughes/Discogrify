@@ -12,11 +12,19 @@ console.log('Database config:', {
     password: process.env.POSTGRES_PASSWORD ? '[REDACTED]' : 'undefined'
 });
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 const pool = new Pool({
-    host: process.env.POSTGRES_HOST,
-    port: parseInt(process.env.POSTGRES_PORT || '5432'),
+    host: isProduction 
+        ? process.env.POSTGRES_HOST 
+        : 'aws-0-eu-west-2.pooler.supabase.com',
+    port: parseInt(isProduction 
+        ? process.env.POSTGRES_PORT || '5432' 
+        : '6543'),
     database: process.env.POSTGRES_DATABASE,
-    user: process.env.POSTGRES_USER,
+    user: isProduction 
+        ? process.env.POSTGRES_USER 
+        : 'postgres.vsgcnxzclxdujjgkmuha',
     password: process.env.POSTGRES_PASSWORD,
     ssl: { rejectUnauthorized: false },
 });
