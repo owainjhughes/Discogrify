@@ -140,7 +140,10 @@ app.get('/', async (req: Request, res: Response) => {
             const album_info = await AlbumService.getAllAlbums(access_token);
             res.render('albums.html', { album_info });
         } catch (err) {
-            console.error(err);
+            console.error('Error loading albums:', err);
+            // Clear invalid cookies and redirect to login
+            res.clearCookie('logged_in');
+            res.clearCookie('access_token');
             res.redirect('/');
         }
     } else {

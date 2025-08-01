@@ -87,9 +87,10 @@ export const AlbumService = {
     },
 
     async getAllAlbums(access_token: string): Promise<Album[]> {
-        const spotifyUserId = await APIOperations.fetchSpotifyUser(access_token);
-        const oldUserId = access_token.substring(0, 20);
-        console.log(`Spotify user ID: ${spotifyUserId}, Old user ID: ${oldUserId}`);
+        try {
+            const spotifyUserId = await APIOperations.fetchSpotifyUser(access_token);
+            const oldUserId = access_token.substring(0, 20);
+            console.log(`Spotify user ID: ${spotifyUserId}, Old user ID: ${oldUserId}`);
 
         // Try new user ID first
         let existingAlbums = await this.getUserAlbumsFromDatabase(spotifyUserId);
@@ -108,11 +109,15 @@ export const AlbumService = {
             }
         }
 
-        if (existingAlbums.length > 0) {
-            return existingAlbums;
-        } else {
-            console.log(`New user detected, fetching basic album info from Spotify for user ${spotifyUserId}`);
-            return await this.fetchAndStoreBasicAlbums(access_token, spotifyUserId);
+            if (existingAlbums.length > 0) {
+                return existingAlbums;
+            } else {
+                console.log(`New user detected, fetching basic album info from Spotify for user ${spotifyUserId}`);
+                return await this.fetchAndStoreBasicAlbums(access_token, spotifyUserId);
+            }
+        } catch (error) {
+            console.error('Failed to get albums - likely invalid access token:', error);
+            throw new Error('INVALID_TOKEN');
         }
     },
 

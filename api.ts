@@ -37,13 +37,30 @@ const discogsRateLimiter = new DiscogsRateLimiter();
 
 export const APIOperations = {
     async fetchSpotifyUser(access_token: string): Promise<string> {
-        const response = await fetch('https://api.spotify.com/v1/me', {
-            headers: {
-                'Authorization': 'Bearer ' + access_token
+        try {
+            const response = await fetch('https://api.spotify.com/v1/me', {
+                headers: {
+                    'Authorization': 'Bearer ' + access_token
+                }
+            });
+
+            if (!response.ok) {
+                console.error(`Spotify API error: ${response.status} ${response.statusText}`);
+                throw new Error(`Spotify API returned ${response.status}`);
             }
-        });
-        const userData = await response.json();
-        return userData.id;
+
+            const userData = await response.json();
+            
+            if (!userData.id) {
+                console.error('Spotify user data missing ID:', userData);
+                throw new Error('Invalid Spotify user data');
+            }
+
+            return userData.id;
+        } catch (error) {
+            console.error('Failed to fetch Spotify user:', error);
+            throw error;
+        }
     },
 
     async fetchSpotifyAlbums(access_token: string): Promise<any[]> {
@@ -75,16 +92,12 @@ export const APIOperations = {
         const cleaningPatterns = [
             /\s*\([^)]*\)/g,
             /\s*\[[^\]]*\]/g,
-
             /\s*-\s*(Deluxe|Expanded|Remastered|Anniversary|Special|Limited|Collector's?).*$/i,
             /\s*(Deluxe|Expanded|Remastered|Anniversary|Special|Limited|Collector's?)\s*(Edition|Version|Release).*$/i,
-
             /\s*-\s*(Live|Acoustic|Unplugged|MTV).*$/i,
             /\s*(Live|Acoustic|Unplugged|MTV)\s*(at|from|in|on).*$/i,
-
             /\s*-?\s*\d{4}.*$/,
             /\s*\(\d{4}\).*$/,
-
             /^The\s+/i
         ];
 
