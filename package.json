@@ -1,5 +1,5 @@
 {
-  "name": "spotify-popularity-tracker",
+  "name": "discogrify",
   "version": "1.0.0",
   "description": "A tool which allows a user to browser analytics about their listening habits",
   "main": "dist/app.js",
@@ -14,14 +14,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/owainjhughes/spotify-popularity-tracker.git"
+    "url": "git+https://github.com/owainjhughes/discogrify.git"
   },
   "author": "Owain Hughes",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/owainjhughes/spotify-popularity-tracker/issues"
+    "url": "https://github.com/owainjhughes/discogrify/issues"
   },
-  "homepage": "https://github.com/owainjhughes/spotify-popularity-tracker#readme",
+  "homepage": "https://github.com/owainjhughes/discogrify#readme",
   "dependencies": {
     "@neondatabase/serverless": "^1.0.1",
     "@types/dotenv": "^6.1.1",
