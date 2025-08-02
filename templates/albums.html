@@ -1,36 +1,99 @@
 <%- include('partials/head.html', { title: 'Your Albums' }) %>
 <%- include('partials/navbar.html', { currentPage: 'albums' }) %>
 
-<div id="albums-list">
-    <input class="search" placeholder="Search albums..." style="margin:20px 0; padding:6px; border-radius:4px; border:1px solid #282828;">
-    <table class="table album-table">
-        <thead>
-            <tr>
-                <th class="sort" data-sort="album-cover">Album Cover</th>
-                <th class="sort" data-sort="album-name">Album Name</th>
-                <th class="sort" data-sort="artists">Artists</th>
-                <th class="sort" data-sort="rating">Rating</th>
-            </tr>
-        </thead>
-        <tbody class="list">
-            <% for(var i=0; i < album_info.length; i++) { %>
-            <tr>
-                <td class="album-cover">
-                    <img src="<%= album_info[i].image %>" alt="<%= album_info[i].name %>" style="width: 50px; height: 50px; border-radius: 4px; margin-right: 10px;">
-                </td>
-                <td class="album-name"><%= album_info[i].name %></td>
-                <td class="artists"><%= album_info[i].artists %></td>
-                <td class="rating">
-                    <% if (album_info[i].rating) { %>
-                        <span style="color: #1ed760; font-weight: bold;"><%= album_info[i].rating %></span>
-                    <% } else { %>
-                        <span style="color: #888;">N/A</span>
-                    <% } %>
-                </td>
-            </tr>
-            <% } %>
-        </tbody>
-    </table>
+<div class="main-container">
+
+    <div class="stats-container">
+        <div class="stat-badge">
+            <span class="stat-number"><%= album_info.length %></span>
+            <span class="stat-label">Albums</span>
+        </div>
+        <div class="stat-badge">
+            <span class="stat-number"><%= album_info.filter(album => album.rating).length %></span>
+            <span class="stat-label">Rated</span>
+        </div>
+        <div class="stat-badge">
+            <span class="stat-number">
+                <% if (album_info.filter(album => album.rating).length > 0) { %>
+                    <%= (album_info.filter(album => album.rating).reduce((sum, album) => sum + album.rating, 0) / album_info.filter(album => album.rating).length).toFixed(1) %>
+                <% } else { %>
+                    —
+                <% } %>
+            </span>
+            <span class="stat-label">Average</span>
+        </div>
+    </div>
+
+    <div class="content-wrapper">
+        <div class="filters-sidebar">
+            <h3>Filters</h3>
+            <div class="filter-group">
+                <label class="filter-label">Show Unrated</label>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="show-unrated" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">Rating Filter</label>
+                <select id="rating-operator" class="filter-select">
+                    <option value="">All ratings</option>
+                    <option value="gte">≥ Greater than or equal</option>
+                    <option value="lte">≤ Less than or equal</option>
+                    <option value="eq">= Equal to</option>
+                </select>
+                <input type="number" id="rating-value" class="filter-input" placeholder="Rating" min="0" max="10" step="0.1" disabled>
+            </div>
+
+
+
+            <button id="clear-filters" class="clear-filters-btn">Clear Filters</button>
+        </div>
+
+        <div class="main-content">
+            <div id="albums-list">
+                <div class="search-container">
+                    <input class="search" placeholder="Search albums">
+                </div>
+                
+                <table class="album-table">
+                    <thead>
+                        <tr>
+                            <th class="sort" data-sort="album-cover">#</th>
+                            <th class="sort" data-sort="album-name">Title</th>
+                            <th class="sort" data-sort="artists">Artist</th>
+                            <th class="sort" data-sort="rating">Rating</th>
+                        </tr>
+                    </thead>
+                    <tbody class="list">
+                        <% for(var i=0; i < album_info.length; i++) { %>
+                        <tr>
+                            <td class="album-cover">
+                                <img src="<%= album_info[i].image %>" alt="<%= album_info[i].name %>">
+                            </td>
+                            <td class="album-name"><%= album_info[i].name %></td>
+                            <td class="artists"><%= album_info[i].artists %></td>
+                            <td class="rating" data-rating="<%= album_info[i].rating || 0 %>">
+                                <% if (album_info[i].rating) { %>
+                                    <% if (album_info[i].rating >= 8.5) { %>
+                                        <span class="rating-high"><%= album_info[i].rating %></span>
+                                    <% } else if (album_info[i].rating >= 7.0) { %>
+                                        <span class="rating-medium"><%= album_info[i].rating %></span>
+                                    <% } else { %>
+                                        <span class="rating-low"><%= album_info[i].rating %></span>
+                                    <% } %>
+                                <% } else { %>
+                                    <span class="rating-na">—</span>
+                                <% } %>
+                            </td>
+                        </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
 
 <%- include('partials/footer.html') %>
@@ -38,10 +101,222 @@
     additionalScripts: `
     <script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/2.3.1/list.min.js"></script>
     <script>
-        var options = {
-            valueNames: [ 'album-name', 'artists', 'rating' ]
-        };
-        var albumList = new List('albums-list', options);
+        console.log('JavaScript is running!');
+        
+        // Wait for page to load
+        window.addEventListener('load', function() {
+            console.log('Page loaded, initializing...');
+            
+            var options = {
+                valueNames: [ 
+                    'album-name', 
+                    'artists', 
+                    { name: 'rating', attr: 'data-rating' }
+                ]
+            };
+            var albumList = new List('albums-list', options);
+            console.log('List.js initialized:', albumList);
+            
+            // Apply default sorting: artist name first, then album name
+            // Note: List.js applies sorts in reverse order, so we sort by album first, then artist
+            albumList.sort('album-name', { order: 'asc' });
+            albumList.sort('artists', { order: 'asc' });
+            
+            // Override the sort function to maintain secondary sorting
+            const originalSort = albumList.sort;
+            albumList.sort = function(valueName, options) {
+                // Call the original sort
+                originalSort.call(this, valueName, options);
+                
+                // If not sorting by artist or album name, apply secondary sort
+                if (valueName !== 'artists' && valueName !== 'album-name') {
+                    // Group items by the primary sort value and then sort within groups
+                    const items = this.items;
+                    const sortedItems = [];
+                    const groups = {};
+                    
+                    // Group items by primary sort value
+                    items.forEach(item => {
+                        let primaryValue;
+                        if (valueName === 'rating') {
+                            primaryValue = parseFloat(item.elm.querySelector('.rating').getAttribute('data-rating')) || 0;
+                        } else {
+                            primaryValue = item.values()[valueName] || '';
+                        }
+                        
+                        if (!groups[primaryValue]) {
+                            groups[primaryValue] = [];
+                        }
+                        groups[primaryValue].push(item);
+                    });
+                    
+                    // Sort within each group by artist, then album
+                    Object.keys(groups).forEach(key => {
+                        groups[key].sort((a, b) => {
+                            const artistA = a.values().artists.toLowerCase();
+                            const artistB = b.values().artists.toLowerCase();
+                            const albumA = a.values()['album-name'].toLowerCase();
+                            const albumB = b.values()['album-name'].toLowerCase();
+                            
+                            if (artistA !== artistB) {
+                                return artistA.localeCompare(artistB);
+                            }
+                            return albumA.localeCompare(albumB);
+                        });
+                    });
+                    
+                    // Rebuild the sorted list
+                    const sortOrder = options && options.order === 'desc' ? 'desc' : 'asc';
+                    const sortedKeys = Object.keys(groups).sort((a, b) => {
+                        if (valueName === 'rating') {
+                            const numA = parseFloat(a);
+                            const numB = parseFloat(b);
+                            return sortOrder === 'desc' ? numB - numA : numA - numB;
+                        } else {
+                            return sortOrder === 'desc' ? b.localeCompare(a) : a.localeCompare(b);
+                        }
+                    });
+                    
+                    // Clear and rebuild the list
+                    this.items = [];
+                    sortedKeys.forEach(key => {
+                        this.items = this.items.concat(groups[key]);
+                    });
+                    
+                    // Update the display
+                    this.update();
+                }
+                
+                return this;
+            };
+            
+            // Filter functionality
+            const showUnratedToggle = document.getElementById('show-unrated');
+            const ratingOperator = document.getElementById('rating-operator');
+            const ratingValue = document.getElementById('rating-value');
+            const clearFiltersBtn = document.getElementById('clear-filters');
+            
+            // Debug: Check if elements are found
+            console.log('Filter elements found:', {
+                showUnratedToggle: !!showUnratedToggle,
+                ratingOperator: !!ratingOperator,
+                ratingValue: !!ratingValue,
+                clearFiltersBtn: !!clearFiltersBtn,
+                albumsListElement: !!document.getElementById('albums-list')
+            });
+        
+            // Enable/disable rating value input based on operator selection
+            if (ratingOperator && ratingValue) {
+                ratingOperator.addEventListener('change', function() {
+                    console.log('Rating operator changed:', this.value);
+                    ratingValue.disabled = this.value === '';
+                    if (this.value === '') {
+                        ratingValue.value = '';
+                    }
+                    applyFilters();
+                });
+            }
+            
+            // Apply filters when any filter changes
+            if (showUnratedToggle) {
+                showUnratedToggle.addEventListener('change', function() {
+                    console.log('Show unrated toggle changed:', this.checked);
+                    applyFilters();
+                });
+            }
+            
+            if (ratingValue) {
+                ratingValue.addEventListener('input', function() {
+                    console.log('Rating value changed:', this.value);
+                    applyFilters();
+                });
+            }
+        
+            function applyFilters() {
+                console.log('Applying filters...');
+                
+                // Clear existing filters first
+                albumList.filter();
+                
+                // Apply filters
+                albumList.filter(function(item) {
+                    const ratingElement = item.elm.querySelector('.rating');
+                    if (!ratingElement) return true;
+                    
+                    // Get rating from data attribute (more reliable)
+                    const dataRating = parseFloat(ratingElement.getAttribute('data-rating'));
+                    const isUnrated = dataRating === 0 || isNaN(dataRating);
+                    
+                    console.log('Processing album:', {
+                        name: item.elm.querySelector('.album-name').textContent,
+                        dataRating: dataRating,
+                        isUnrated: isUnrated
+                    });
+                    
+                    // Check if rating comparison filter is active
+                    const hasRatingFilter = ratingOperator && ratingValue && ratingOperator.value && ratingValue.value;
+                    
+                    // If rating comparison filter is active, exclude unrated albums automatically
+                    if (hasRatingFilter && isUnrated) {
+                        console.log('Filtering out unrated album due to rating filter:', item.elm.querySelector('.album-name').textContent);
+                        return false;
+                    }
+                    
+                    // Show unrated filter (only applies when no rating comparison filter is active)
+                    if (!hasRatingFilter && showUnratedToggle && !showUnratedToggle.checked && isUnrated) {
+                        console.log('Filtering out unrated album:', item.elm.querySelector('.album-name').textContent);
+                        return false;
+                    }
+                    
+                    // Rating comparison filter (only apply to rated albums)
+                    if (hasRatingFilter && !isUnrated) {
+                        const targetRating = parseFloat(ratingValue.value);
+                        let shouldShow = true;
+                        
+                        switch (ratingOperator.value) {
+                            case 'gte':
+                                shouldShow = dataRating >= targetRating;
+                                break;
+                            case 'lte':
+                                shouldShow = dataRating <= targetRating;
+                                break;
+                            case 'eq':
+                                shouldShow = Math.abs(dataRating - targetRating) <= 0.05;
+                                break;
+                        }
+                        
+                        if (!shouldShow) {
+                            console.log('Filtering out by rating:', item.elm.querySelector('.album-name').textContent, dataRating, ratingOperator.value, targetRating);
+                            return false;
+                        }
+                    }
+                    
+                    return true;
+                });
+                
+                console.log('Filter applied, visible items:', albumList.visibleItems.length);
+            }
+            
+            // Clear filters
+            if (clearFiltersBtn) {
+                clearFiltersBtn.addEventListener('click', function() {
+                    console.log('Clearing filters...');
+                    if (showUnratedToggle) showUnratedToggle.checked = true;
+                    if (ratingOperator) ratingOperator.value = '';
+                    if (ratingValue) {
+                        ratingValue.value = '';
+                        ratingValue.disabled = true;
+                    }
+                    
+                    albumList.filter();
+                    console.log('Filters cleared');
+                });
+            }
+        
+            // Test the filters immediately
+            console.log('Testing initial filter application...');
+            applyFilters();
+        });
     </script>
     `
 }) %>
