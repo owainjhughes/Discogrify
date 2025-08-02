@@ -1,7 +1,7 @@
 {
   "name": "discogrify",
   "version": "1.0.0",
-  "description": "A tool which allows a user to browser analytics about their listening habits",
+  "description": "Discogrify - Discover and rate your Spotify albums with community ratings from Discogs",
   "main": "dist/app.js",
   "scripts": {
     "clean": "rm -rf dist",

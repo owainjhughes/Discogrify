@@ -55,7 +55,7 @@ app.use(express.static(path.join(__dirname, '..', 'templates')))
 
 // Spotify App credentials
 const redirect_uri = process.env.NODE_ENV === 'production'
-    ? 'https://spotify-popularity-tracker.vercel.app/callback'
+    ? 'https://discogrify.vercel.app/callback'
     : 'http://localhost:8888/callback';
 const client_id = process.env.client_id as string
 const client_secret = process.env.client_secret as string;

@@ -50,7 +50,7 @@ export const APIOperations = {
             }
 
             const userData = await response.json();
-            
+
             if (!userData.id) {
                 console.error('Spotify user data missing ID:', userData);
                 throw new Error('Invalid Spotify user data');
