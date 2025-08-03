@@ -526,4 +526,201 @@ input:checked + .toggle-slider:before {
         flex-direction: column;
         align-items: center;
     }
+}/* T
+est Account Button */
+.test-account-button {
+    background: transparent;
+    border: 2px solid #1ed760;
+    color: #1ed760;
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 15px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+}
+
+.test-account-button:hover {
+    background-color: #1ed760;
+    color: #000;
+    transform: translateY(-2px);
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    background-color: #282828;
+    margin: 10% auto;
+    padding: 0;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 450px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid #404040;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.close {
+    color: #b3b3b3;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.close:hover {
+    color: #fff;
+}
+
+.modal-body {
+    padding: 24px;
+}
+
+.credential-row {
+    margin-bottom: 20px;
+}
+
+.credential-row label {
+    display: block;
+    color: #b3b3b3;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.credential-value {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #404040;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid #535353;
+}
+
+.credential-value span {
+    flex: 1;
+    color: #fff;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+}
+
+.copy-btn, .reveal-btn {
+    background: transparent;
+    border: none;
+    color: #b3b3b3;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    font-size: 14px;
+}
+
+.copy-btn:hover, .reveal-btn:hover {
+    color: #1ed760;
+    background-color: rgba(30, 215, 96, 0.1);
+}
+
+.modal-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background-color: rgba(30, 215, 96, 0.1);
+    border: 1px solid rgba(30, 215, 96, 0.3);
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 20px;
+}
+
+.modal-note i {
+    color: #1ed760;
+    margin-top: 2px;
+}
+
+.modal-note span {
+    color: #b3b3b3;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+/* Toast Notification */
+.toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #1ed760;
+    color: #000;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    z-index: 1001;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .modal-content {
+        margin: 20% auto;
+        width: 95%;
+    }
+    
+    .modal-header {
+        padding: 16px 20px;
+    }
+    
+    .modal-body {
+        padding: 20px;
+    }
+    
+    .credential-value {
+        padding: 10px 12px;
+    }
 }

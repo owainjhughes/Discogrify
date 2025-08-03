@@ -8,6 +8,47 @@
         <a href="/login" class="login-button">
             <i class="fab fa-spotify"></i> Login with Spotify
         </a>
+        <button class="test-account-button" onclick="showTestCredentials()">
+            <i class="fas fa-user-cog"></i> Test Account
+        </button>
+        
+        <!-- Test Credentials Modal -->
+        <div id="testCredentialsModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Test Account Credentials</h3>
+                    <span class="close" onclick="hideTestCredentials()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="credential-row">
+                        <label>Email:</label>
+                        <div class="credential-value">
+                            <span>discogrifytest@gmail.com</span>
+                            <button class="copy-btn" onclick="copyToClipboard('discogrifytest@gmail.com')" title="Copy email">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="credential-row">
+                        <label>Password:</label>
+                        <div class="credential-value">
+                            <span id="passwordText" class="password-hidden">••••••••••••••</span>
+                            <button class="reveal-btn" onclick="togglePassword()" title="Show/hide password">
+                                <i id="eyeIcon" class="fas fa-eye"></i>
+                            </button>
+                            <button class="copy-btn" onclick="copyToClipboard('discogrifytest!')" title="Copy password">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="modal-note">
+                        <i class="fas fa-info-circle"></i>
+                        <span>Use these credentials to test the app without creating your own Spotify account.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <div class="features">
             <div class="feature-card">
                 <i class="fas fa-chart-line feature-icon"></i>
@@ -33,6 +74,68 @@
         window.addEventListener('DOMContentLoaded', function() {
             document.querySelector('.login-box').classList.add('visible');
             document.querySelector('.spotify-logo').classList.add('visible');
+        });
+        
+        function showTestCredentials() {
+            document.getElementById('testCredentialsModal').style.display = 'block';
+        }
+        
+        function hideTestCredentials() {
+            document.getElementById('testCredentialsModal').style.display = 'none';
+        }
+        
+        function togglePassword() {
+            const passwordText = document.getElementById('passwordText');
+            const eyeIcon = document.getElementById('eyeIcon');
+            
+            if (passwordText.classList.contains('password-hidden')) {
+                passwordText.textContent = 'discogrifytest!';
+                passwordText.classList.remove('password-hidden');
+                eyeIcon.classList.remove('fa-eye');
+                eyeIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordText.textContent = '••••••••••••••';
+                passwordText.classList.add('password-hidden');
+                eyeIcon.classList.remove('fa-eye-slash');
+                eyeIcon.classList.add('fa-eye');
+            }
+        }
+        
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                // Show a brief success indication
+                const event = new CustomEvent('showToast', { detail: 'Copied to clipboard!' });
+                window.dispatchEvent(event);
+            }).catch(function(err) {
+                console.error('Could not copy text: ', err);
+            });
+        }
+        
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            const modal = document.getElementById('testCredentialsModal');
+            if (event.target === modal) {
+                hideTestCredentials();
+            }
+        }
+        
+        // Simple toast notification
+        window.addEventListener('showToast', function(e) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = e.detail;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 100);
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    document.body.removeChild(toast);
+                }, 300);
+            }, 2000);
         });
     </script>
     `
